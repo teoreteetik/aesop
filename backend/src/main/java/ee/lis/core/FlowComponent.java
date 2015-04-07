@@ -46,8 +46,10 @@ public abstract class FlowComponent<T extends ConfMsg> extends AbstractActorWith
         } else {
             try {
                 super.aroundReceive(receive, msg);
+                log.info("Message processed. Sender: " + sender() + ". Message body: " + msg);
                 eventStream.publish(new MsgProcessed(sender(), self(), msg, start, System.currentTimeMillis()));
             } catch (Throwable t) {
+                log.error("Message processing failed. Sender: " + sender() + ". Message body: " + msg, t);
                 eventStream.publish(new MsgProcessed(sender(), self(), msg, start, System.currentTimeMillis(), t));
                 throw t;
             }

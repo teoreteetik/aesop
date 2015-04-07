@@ -30,9 +30,7 @@ public class SocketServer extends FlowComponent<SocketServerConf>{
                 throw new RuntimeException("Unable to start server on " + conf.address + ":" + conf.portNumber + " - " + msg.cmd().failureMessage());
             })
             .match(Connected.class, msg -> {
-                System.out.println("oeusntoehunoeth");
                 sender().tell(TcpMessage.register(self()), self());
-                System.out.println("becoming connected");
                 context().become(getConnectedState(sender()));
                 unstashAll();
             })
@@ -50,12 +48,10 @@ public class SocketServer extends FlowComponent<SocketServerConf>{
                 conf.recipientActor.tell(new BytesMessage(msg.data().toArray()), self()))
             .match(CommandFailed.class, msg -> {
                 log.error("Connection with client lost");
-                System.out.println("unbecoming");
                 context().unbecome();
             })
             .match(ConnectionClosed.class, msg -> {
                 log.error("Connection closed");
-                System.out.println("unbecimng");
                 context().become(getBehaviour(), true);
             })
             .match(Connected.class, msg -> {
