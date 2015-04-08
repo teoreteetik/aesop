@@ -6,10 +6,10 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import ee.lis.flow_component.lis2a2_to_string.StringToLIS2A2Converter;
-import ee.lis.flow_component.lis2a2_to_string.lis2a2_description.message.LIS2A2ResultMsg;
-import ee.lis.flow_component.lis2a2_to_string.lis2a2_description.record.OrderRecord;
-import ee.lis.flow_component.lis2a2_to_string.lis2a2_description.record.PatientRecord;
-import ee.lis.flow_component.lis2a2_to_string.lis2a2_description.record.ResultRecord;
+import ee.lis.interfaces.lis2a2.msg.LIS2A2ResultMsg;
+import ee.lis.interfaces.lis2a2.record.O;
+import ee.lis.interfaces.lis2a2.record.P;
+import ee.lis.interfaces.lis2a2.record.R;
 import ee.lis.util.CommonProtocol.DestinationConf;
 import java.util.List;
 import org.junit.AfterClass;
@@ -49,19 +49,19 @@ public class StringToLIS2A2ConverterTest {
             stringToLIS2A2Converter.tell(new DestinationConf(destination.getRef()), getRef());
             stringToLIS2A2Converter.tell(resultMessage, getRef());
             LIS2A2ResultMsg received = destination.expectMsgClass(LIS2A2ResultMsg.class);
-            List<PatientRecord> patientRecords = received.getPatientRecords();
+            List<P> patientRecords = received.getPatientRecords();
             Assert.assertEquals(1, patientRecords.size());
 
-            PatientRecord patientRecord = patientRecords.get(0);
+            P patientRecord = patientRecords.get(0);
 
             Assert.assertEquals("Smith", patientRecord.getSurname());
             Assert.assertEquals("John", patientRecord.getFirstName());
             Assert.assertEquals("52483291", patientRecord.getPatientId());
 
-            List<OrderRecord> orderRecords = received.getOrderRecords(patientRecords.get(0));
+            List<O> orderRecords = received.getOrderRecords(patientRecords.get(0));
             Assert.assertEquals(1, orderRecords.size());
 
-            List<ResultRecord> resultRecords = received.getResultRecords(orderRecords.get(0));
+            List<R> resultRecords = received.getResultRecords(orderRecords.get(0));
             Assert.assertEquals(2, resultRecords.size());
         }};
     }

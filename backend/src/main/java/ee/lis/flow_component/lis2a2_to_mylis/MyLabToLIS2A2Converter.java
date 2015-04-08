@@ -1,16 +1,17 @@
 package ee.lis.flow_component.lis2a2_to_mylis;
 
 import akka.japi.pf.ReceiveBuilder;
-import ee.lis.flow_component.lis2a2_to_string.lis2a2_description.message.LIS2A2OrderMsg;
-import ee.lis.flow_component.lis2a2_to_string.lis2a2_description.record.*;
-import ee.lis.util.CommonProtocol.DestinationConf;
-import ee.lis.mylab_interface.MyLabMessages.Analysis;
-import ee.lis.mylab_interface.MyLabMessages.Container;
-import ee.lis.mylab_interface.MyLabMessages.MyLabOrderMsg;
 import ee.lis.core.FlowComponent;
-import java.util.ArrayList;
+import ee.lis.interfaces.MyLabMessages.Analysis;
+import ee.lis.interfaces.MyLabMessages.Container;
+import ee.lis.interfaces.MyLabMessages.MyLabOrderMsg;
+import ee.lis.interfaces.lis2a2.msg.LIS2A2OrderMsg;
+import ee.lis.interfaces.lis2a2.record.H;
+import ee.lis.interfaces.lis2a2.record.L;
+import ee.lis.interfaces.lis2a2.record.O;
+import ee.lis.interfaces.lis2a2.record.P;
+import ee.lis.util.CommonProtocol.DestinationConf;
 import java.util.Date;
-import java.util.List;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
@@ -28,33 +29,30 @@ public class MyLabToLIS2A2Converter extends FlowComponent<DestinationConf> {
     }
 
     public LIS2A2OrderMsg myLabOrderMsgToLIS2A2OrderMsg(MyLabOrderMsg myLabOrderMsg) {
-        List<LIS2A2Record> records = new ArrayList<>();
-        records.add(
-            new HeaderRecord()
+        LIS2A2OrderMsg result = new LIS2A2OrderMsg();
+        result = result
+            .addRecord(H.create()
                 .setMessageControlId("12345")
                 .setSenderId("MyLIS")
                 .setReceiverId("Analyzer")
                 .setDateTime(new Date())
                 .setVersionNumber("LIS2-A2")
                 .setProcessingId("P")
-                .setSenderAdress("York 15", "London", null, "89983", null));
-        records.add(
-            new PatientRecord()
-                .setSequenceNumber(1)
+                .setSenderAdress("York 15", "London", null, "89983", null))
+            .addRecord(P.create(1)
                 .setPatientId(myLabOrderMsg.order.patient.patientId)
                 .setFirstName(myLabOrderMsg.order.patient.firstName)
                 .setSurname(myLabOrderMsg.order.patient.surname));
         int i = 1;
         for (Container container : myLabOrderMsg.order.containers) {
-            OrderRecord orderRecord = new OrderRecord()
-                .setSequenceNumber(i++)
+            O orderRecord = O.create(i++)
                 .setSpecimenId(container.specimenId)
                 .addPriorityCode("P");
             for (Analysis analysis : container.analyses)
-                orderRecord.addAnalysis(null, analysis.name, null, analysis.code);
-            records.add(orderRecord);
+                orderRecord = orderRecord.addAnalysis(null, analysis.name, null, analysis.code);
+            result = result.addRecord(orderRecord);
         }
-        records.add(new TerminatorRecord().setSequenceNumber(1));
-        return new LIS2A2OrderMsg(records);
+        result = result.addRecord(L.create(1));
+        return result;
     }
 }

@@ -1,9 +1,9 @@
 package ee.lis.flow_component.mylab_http;
 
 import akka.japi.pf.ReceiveBuilder;
-import ee.lis.mylab_interface.MyLabMessages.MyLabOrderMsg;
-import ee.lis.mylab_interface.MyLabMessages.MyLabQueryMsg;
-import ee.lis.mylab_interface.MyLabMessages.MyLabResultMsg;
+import ee.lis.interfaces.MyLabMessages.MyLabOrderMsg;
+import ee.lis.interfaces.MyLabMessages.MyLabQueryMsg;
+import ee.lis.interfaces.MyLabMessages.MyLabResultMsg;
 import ee.lis.core.FlowComponent;
 import ee.lis.util.JsonUtil;
 import java.io.*;

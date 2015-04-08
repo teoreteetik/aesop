@@ -4,7 +4,7 @@ import akka.actor.ActorRef;
 import akka.japi.pf.ReceiveBuilder;
 import akka.pattern.Patterns;
 import ee.lis.core.FlowComponent;
-import ee.lis.util.CommonProtocol.DestinationConf;
+import ee.lis.mock.HttpServerConf;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletException;
@@ -22,8 +22,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.runtime.BoxedUnit;
 
-public class HttpServerActor extends FlowComponent<DestinationConf> {
-
+public class HttpServer extends FlowComponent<HttpServerConf> {
 
     public static class ResultMessageHandler extends HttpServlet {
 
@@ -62,20 +61,21 @@ public class HttpServerActor extends FlowComponent<DestinationConf> {
         }
     }
 
+
     @Override
     protected void init() throws Exception {
         Server server = new Server();
         ServerConnector connector = new ServerConnector(server);
-        connector.setPort(8070); //todo
-        connector.setHost("localhost");
+        connector.setPort(conf.port);
+        connector.setHost(conf.address);
         server.setConnectors(new Connector[]{connector});
 
         ServletHandler handler = new ServletHandler();
 
-        ResultMessageHandler resultHandler = new ResultMessageHandler(conf.destination, self());
+        ResultMessageHandler resultHandler = new ResultMessageHandler(conf.recipientActor, self());
         handler.addServletWithMapping(new ServletHolder(resultHandler), "/result");
 
-        QueryMessageHandler queryMessageHandler = new QueryMessageHandler(conf.destination);
+        QueryMessageHandler queryMessageHandler = new QueryMessageHandler(conf.recipientActor);
         handler.addServletWithMapping(new ServletHolder(queryMessageHandler), "/query");
 
         server.setHandler(handler);
@@ -86,7 +86,6 @@ public class HttpServerActor extends FlowComponent<DestinationConf> {
 
     @Override
     protected PartialFunction<Object, BoxedUnit> getBehaviour() {
-        return ReceiveBuilder.match(String.class, s -> {
-        }).build();
+        return ReceiveBuilder.match(String.class, this::unhandled).build();
     }
 }

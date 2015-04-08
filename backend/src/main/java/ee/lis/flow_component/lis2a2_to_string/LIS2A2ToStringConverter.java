@@ -1,7 +1,7 @@
 package ee.lis.flow_component.lis2a2_to_string;
 
 import akka.japi.pf.ReceiveBuilder;
-import ee.lis.flow_component.lis2a2_to_string.lis2a2_description.message.LIS2A2Msg;
+import ee.lis.interfaces.lis2a2.msg.LIS2A2Msg;
 import ee.lis.util.CommonProtocol.DestinationConf;
 import ee.lis.core.FlowComponent;
 import scala.PartialFunction;

@@ -1,19 +1,16 @@
 package ee.lis;
 
-import akka.actor.ActorRef;
+import static java.util.Arrays.asList;
 import akka.actor.ActorSystem;
-import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
-import ee.lis.driver.DynamicDriver;
-import ee.lis.mylab_interface.MyLabMessages.*;
 import ee.lis.mock.MockLIS;
 import ee.lis.mock.MockSocketAnalyzer;
 import ee.lis.mock.MockSocketAnalyzer.Mode;
+import ee.lis.interfaces.MyLabMessages.*;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -27,7 +24,7 @@ public class LIS2A2OverIPTest {
     public static void setup() {
         system = ActorSystem.create("testSystem");
         mockAnalyzer = new MockSocketAnalyzer(system, "127.0.0.1", 50_000, Mode.CLIENT);
-        mockLIS = new MockLIS(system, 8070);
+        mockLIS = new MockLIS(system, "127.0.0.1", 8070);
 
 //        ActorRef lis2a2Driver = system.actorOf(Props.create(DynamicDriver.class), "lis2a2Driver");
         Config config = ConfigFactory.load().getConfig("Drivers.LIS2A2OverIP")
@@ -67,8 +64,8 @@ public class LIS2A2OverIPTest {
 
             mockLIS.expect(
                 new MyLabResultMsg(new Order(new Patient("John", "Smith", "52483291"),
-                    Arrays.asList(new Container("5762",
-                        Arrays.asList(new Analysis("Org#", "", new Result("51", "")),
+                    asList(new Container("5762",
+                        asList(new Analysis("Org#", "", new Result("51", "")),
                             new Analysis("Bio", "", new Result("BH+", "")))))))).send("");
         }};
     }
@@ -89,23 +86,23 @@ public class LIS2A2OverIPTest {
                 .expectNoMsg();
 
             mockLIS
-                .expect(new MyLabQueryMsg(Arrays.asList("SpecimenID1", "SpecimenID2"), Arrays.asList("ALL")))
+                .expect(new MyLabQueryMsg(asList("SpecimenID1", "SpecimenID2"), asList("ALL")))
                 .send(new MyLabOrderMsg(new Order(new Patient("Allen", "Pohl", "12345"),
-                    Arrays.asList(new Container("SpecimenID1", Arrays.asList(new Analysis("An1", "Analysis1", null), new Analysis("An2", "Analysis2", null))),
-                        new Container("SpecimenID2", Arrays.asList(new Analysis("An5", "Analysis5", null)))))));
+                    asList(new Container("SpecimenID1", asList(new Analysis("An1", "Analysis1", null), new Analysis("An2", "Analysis2", null))),
+                        new Container("SpecimenID2", asList(new Analysis("An5", "Analysis5", null)))))));
 
             mockAnalyzer
                 .expect("<ENQ>")
                 .send("<ACK>")
                 .expect("<STX>H|\\^&|12345||MyLIS|York 15^London^^89983^||||Analyzer||P|LIS2-A2|" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "<CR><ETX>{CS}<CR><LF>")
                 .send("<ACK>")
-                .expect("<STX>P|1||12345||Pohl^Allen^^^|||||^^^^||||||^|^||||||^|||||||||^|^|<CR><ETX>{CS}<CR><LF>")
+                .expect("<STX>P|1||12345||Pohl^Allen<CR><ETX>{CS}<CR><LF>")
                 .send("<ACK>")
-                .expect("<STX>O|1|SpecimenID1^^||^Analysis1^^An1\\^Analysis2^^An2|P||||^||||||^|^^^^^||||||||||||||<CR><ETX>{CS}<CR><LF>")
+                .expect("<STX>O|1|SpecimenID1||^Analysis1^^An1\\^Analysis2^^An2|P<CR><ETX>{CS}<CR><LF>")
                 .send("<ACK>")
-                .expect("<STX>O|2|SpecimenID2^^||^Analysis5^^An5|P||||^||||||^|^^^^^||||||||||||||<CR><ETX>{CS}<CR><LF>")
+                .expect("<STX>O|2|SpecimenID2||^Analysis5^^An5|P<CR><ETX>{CS}<CR><LF>")
                 .send("<ACK>")
-                .expect("<STX>L|1|<CR><ETX>{CS}<CR><LF>")
+                .expect("<STX>L|1<CR><ETX>{CS}<CR><LF>")
                 .send("<ACK>")
                 .expect("<EOT>");
         }};

@@ -1,4 +1,4 @@
-package ee.lis.mylab_interface;
+package ee.lis.interfaces;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class MyLabMessages {
             this.order = order;
         }
         public MyLabResultMsg() {
-            this(null);
+            this(null); //for gson
         }
 
         @Override
@@ -26,11 +26,20 @@ public class MyLabMessages {
 
     public static class MyLabOrderMsg implements Serializable {
         public final Order order;
+
         public MyLabOrderMsg(Order order) {
             this.order = order;
         }
+
         public MyLabOrderMsg() {
-            this(null);
+            this(null); // for gson
+        }
+
+        @Override
+        public String toString() {
+            return "MyLabOrderMsg{" +
+                "order=" + order +
+                '}';
         }
     }
 
@@ -41,8 +50,17 @@ public class MyLabMessages {
             this.specimenIds = Collections.unmodifiableList(specimenIds);
             this.analysisCodes = Collections.unmodifiableList(analysisCodes);
         }
+
         public MyLabQueryMsg() {
             this(new ArrayList<>(), new ArrayList<>());
+        }
+
+        @Override
+        public String toString() {
+            return "MyLabQueryMsg{" +
+                "specimenIds=" + specimenIds +
+                ", analysisCodes=" + analysisCodes +
+                '}';
         }
     }
 
