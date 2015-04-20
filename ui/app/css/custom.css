@@ -71,3 +71,28 @@
     color: #fff;
     background: none;
 }
+
+.selectedRow {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+.error .public_fixedDataTableCell_main {
+    background-color: #ebcccc !important;
+}
+
+pre {
+    border: none;
+    background-color: transparent;
+}
+
+.overviewPanel {
+    height: 100%;
+    overflow: scroll;
+    display: block;
+}
+
+.msgDetailsHeader {
+    margin-bottom: 0;
+    font-size: 12px;
+}

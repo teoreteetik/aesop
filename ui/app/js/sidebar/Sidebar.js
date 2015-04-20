@@ -6,7 +6,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", 'react', './AnalyzersList', './filter/MsgFilter'], function (require, exports, React, AnalyzersList, MsgFilter) {
+define(["require", "exports", 'react', './AnalyzersList', './filter/FilterSidebar'], function (require, exports, React, AnalyzersList, FilterSidebar) {
     var BS = require('react-bootstrap');
     var Button = React.createFactory(BS.Button);
     var Glyphicon = React.createFactory(BS.Glyphicon);
@@ -43,7 +43,7 @@ define(["require", "exports", 'react', './AnalyzersList', './filter/MsgFilter'],
                     filterState: _this.props.filterState,
                     onFilterStateChanged: _this.props.onFilterStateChanged
                 };
-                return MsgFilter.Component(filterProps);
+                return FilterSidebar.Component(filterProps);
             };
             this.getCurrentContent = function () {
                 switch (_this.state.currentView) {
@@ -66,7 +66,7 @@ define(["require", "exports", 'react', './AnalyzersList', './filter/MsgFilter'],
             };
         }
         Sidebar.prototype.render = function () {
-            return R.div({ id: 'sidebar' }, R.ul({ className: 'sidebar-nav' }, R.li({ className: 'sidebar-brand' }, R.a({ href: '#' }, 'AkkaLIS')), R.li({}, this.getVisibleButtons())), this.getCurrentContent());
+            return R.div({ id: 'sidebar' }, R.ul({ className: 'sidebar-nav' }, R.li({ className: 'sidebar-brand' }, R.a({ href: '#' }, 'Aesop')), R.li({}, this.getVisibleButtons())), this.getCurrentContent());
         };
         return Sidebar;
     })(React.Component);

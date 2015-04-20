@@ -4,7 +4,7 @@
 
 import React = require('react');
 import WebSocketMsgs = require('./WebSocketMsgs');
-import MsgFilter = require('./sidebar/filter/MsgFilter');
+import MsgProcessedFilter = require('./sidebar/filter/MsgProcessedFilter');
 import _ = require('lodash');
 require('fixed-data-table.css');
 var FixedDataTable = require('fixed-data-table');
@@ -16,7 +16,10 @@ export interface Props {
     rows: Row[];
     tableWidth: number;
     tableHeight: number;
-    filterState: MsgFilter.FilterState;
+    scrollTop: number;
+    filterState: MsgProcessedFilter.FilterState;
+    onRowDoubleClicked: (row: Row) => void;
+    onScrollChanged: (scrollTop: number) => void;
 }
 
 export interface Row {
@@ -35,6 +38,8 @@ var formattedMsgBodyDK = 'formattedMsgBody';
 interface State {
     columnWidths: {[dataKey: string]: number};
     isColumnResizing: boolean;
+    selectedRowIndex: number;
+    clicks: number;
 }
 
 class _ProcessedMsgsTable extends React.Component<Props, State> {
@@ -47,7 +52,9 @@ class _ProcessedMsgsTable extends React.Component<Props, State> {
                 senderName: 350,
                 recipientName: 350,
                 formattedMsgBody: 2000
-            }
+            },
+            selectedRowIndex: undefined,
+            clicks: 0
         };
     }
 
@@ -57,27 +64,54 @@ class _ProcessedMsgsTable extends React.Component<Props, State> {
         this.setState(this.state);
     };
 
+    private passesTextFilter = (row: Row): boolean => !this.props.filterState.searchText ||
+                                                      row.original.msgBody.indexOf(this.props.filterState.searchText) !== -1;
+    private passesStartTimeFilter = (row: Row): boolean => !this.props.filterState.startTime ||
+                                                           row.original.processingStartTime >= this.props.filterState.startTime;
+
     render() {
-        var passesTextFilter = (row: Row) => {
-            return !this.props.filterState.searchText || row.original.msgBody.indexOf(this.props.filterState.searchText) !== -1;
+        var passesEndTimeFilter = (row: Row) => {
+            return !this.props.filterState.endTime || row.original.processingStartTime <= this.props.filterState.endTime;
         };
         var hasCurrentPair = this.props.filterState.currentPair.senderId || this.props.filterState.currentPair.recipientId;
-        var pairPassesFilter = (pair: MsgFilter.Pair, row: Row) => (!pair.senderId || pair.senderId === row.original.senderComponentId) &&
+        var pairPassesFilter = (pair: MsgProcessedFilter.Pair, row: Row) => (!pair.senderId || pair.senderId === row.original.senderComponentId) &&
                                                          (!pair.recipientId || pair.recipientId === row.original.recipientComponentId);
 
         var passesSenderRecipientFilter = (row: Row) => {
-            return _.some(this.props.filterState.addedPairs, (pair: MsgFilter.Pair) => pairPassesFilter(pair, row)) ||
+            return _.some(this.props.filterState.addedPairs, (pair: MsgProcessedFilter.Pair) => pairPassesFilter(pair, row)) ||
                         hasCurrentPair && pairPassesFilter(this.props.filterState.currentPair, row);
         };
         var isFilterPresent = this.props.filterState.addedPairs.length > 0 || hasCurrentPair;
         var rows = this.props.rows.filter(row => {
-            return (!isFilterPresent || passesSenderRecipientFilter(row)) && passesTextFilter(row);
+            return (!isFilterPresent || passesSenderRecipientFilter(row)) && this.passesTextFilter(row) && this.passesStartTimeFilter(row) && passesEndTimeFilter(row);
         });
         var rowGetter = (index:number):Row => {
             return rows[index];
         };
+        var onRowClick = (event, index: number, data) => {
+            this.state.clicks++;
+            if (this.state.clicks === 1) {
+                this.state.selectedRowIndex = index;
+                this.setState(this.state);
+                setTimeout(() => {
+                    if (this.state.clicks == 2)
+                        this.props.onRowDoubleClicked(rows[index]);
+                    this.state.clicks = 0;
+                    this.setState(this.state);
+                }, 500);
+            }
+        };
+        var rowClassNameGetter = (index: number) => {
+            var classNames = [];
+            if (index === this.state.selectedRowIndex)
+                classNames.push('selectedRow');
+            if (rows[index].original.stackTrace)
+                classNames.push('error');
+            return classNames.join(" ");
+        };
         return Table({
                 rowHeight: 30,
+                onRowClick: onRowClick,
                 rowGetter: rowGetter,
                 rowsCount: rows.length,
                 width: this.props.tableWidth,
@@ -85,7 +119,11 @@ class _ProcessedMsgsTable extends React.Component<Props, State> {
                 isColumnResizing: this.state.isColumnResizing,
                 onColumnResizeEndCallback: this._onColumnResizeEndCallback,
                 headerHeight: 40,
-                onRowClick: (event, index, data) => {console.log(index + 'row clicked')}
+                scrollTop: this.props.scrollTop,
+                onScrollEnd: (left, top) => {
+                    this.props.onScrollChanged(top);
+                },
+                rowClassNameGetter: rowClassNameGetter
             },
             Column({
                 label: 'Time',

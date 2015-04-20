@@ -26,6 +26,8 @@ define(["require", "exports", 'react', 'lodash'], function (require, exports, Re
                 _this.state.columnWidths[dataKey] = newColumnWidth;
                 _this.setState(_this.state);
             };
+            this.passesTextFilter = function (row) { return !_this.props.filterState.searchText || row.original.msgBody.indexOf(_this.props.filterState.searchText) !== -1; };
+            this.passesStartTimeFilter = function (row) { return !_this.props.filterState.startTime || row.original.processingStartTime >= _this.props.filterState.startTime; };
             this.state = {
                 isColumnResizing: false,
                 columnWidths: {
@@ -33,13 +35,15 @@ define(["require", "exports", 'react', 'lodash'], function (require, exports, Re
                     senderName: 350,
                     recipientName: 350,
                     formattedMsgBody: 2000
-                }
+                },
+                selectedRowIndex: undefined,
+                clicks: 0
             };
         }
         _ProcessedMsgsTable.prototype.render = function () {
             var _this = this;
-            var passesTextFilter = function (row) {
-                return !_this.props.filterState.searchText || row.original.msgBody.indexOf(_this.props.filterState.searchText) !== -1;
+            var passesEndTimeFilter = function (row) {
+                return !_this.props.filterState.endTime || row.original.processingStartTime <= _this.props.filterState.endTime;
             };
             var hasCurrentPair = this.props.filterState.currentPair.senderId || this.props.filterState.currentPair.recipientId;
             var pairPassesFilter = function (pair, row) { return (!pair.senderId || pair.senderId === row.original.senderComponentId) && (!pair.recipientId || pair.recipientId === row.original.recipientComponentId); };
@@ -48,13 +52,35 @@ define(["require", "exports", 'react', 'lodash'], function (require, exports, Re
             };
             var isFilterPresent = this.props.filterState.addedPairs.length > 0 || hasCurrentPair;
             var rows = this.props.rows.filter(function (row) {
-                return (!isFilterPresent || passesSenderRecipientFilter(row)) && passesTextFilter(row);
+                return (!isFilterPresent || passesSenderRecipientFilter(row)) && _this.passesTextFilter(row) && _this.passesStartTimeFilter(row) && passesEndTimeFilter(row);
             });
             var rowGetter = function (index) {
                 return rows[index];
             };
+            var onRowClick = function (event, index, data) {
+                _this.state.clicks++;
+                if (_this.state.clicks === 1) {
+                    _this.state.selectedRowIndex = index;
+                    _this.setState(_this.state);
+                    setTimeout(function () {
+                        if (_this.state.clicks == 2)
+                            _this.props.onRowDoubleClicked(rows[index]);
+                        _this.state.clicks = 0;
+                        _this.setState(_this.state);
+                    }, 500);
+                }
+            };
+            var rowClassNameGetter = function (index) {
+                var classNames = [];
+                if (index === _this.state.selectedRowIndex)
+                    classNames.push('selectedRow');
+                if (rows[index].original.stackTrace)
+                    classNames.push('error');
+                return classNames.join(" ");
+            };
             return Table({
                 rowHeight: 30,
+                onRowClick: onRowClick,
                 rowGetter: rowGetter,
                 rowsCount: rows.length,
                 width: this.props.tableWidth,
@@ -62,9 +88,11 @@ define(["require", "exports", 'react', 'lodash'], function (require, exports, Re
                 isColumnResizing: this.state.isColumnResizing,
                 onColumnResizeEndCallback: this._onColumnResizeEndCallback,
                 headerHeight: 40,
-                onRowClick: function (event, index, data) {
-                    console.log(index + 'row clicked');
-                }
+                scrollTop: this.props.scrollTop,
+                onScrollEnd: function (left, top) {
+                    _this.props.onScrollChanged(top);
+                },
+                rowClassNameGetter: rowClassNameGetter
             }, Column({
                 label: 'Time',
                 width: this.state.columnWidths[formattedDateDK],

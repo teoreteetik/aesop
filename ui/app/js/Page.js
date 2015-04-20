@@ -18,17 +18,12 @@ define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', '
                 socket.onmessage = function (wsEvent) {
                     var mwEvent = JSON.parse(event.data);
                     var mwEventType = WebSocketMsgs.EventType[mwEvent.eventType];
-                    if (mwEventType == 0 /* AnalyzerInfo */) {
-                        var analyzerInfoEvent = mwEvent.event;
-                        _this.handleAnalyzerInfoEvent(analyzerInfoEvent);
-                    }
-                    else if (mwEventType == 2 /* LogEvent */) {
-                        var logEvent = mwEvent.event;
-                    }
-                    else if (mwEventType == 1 /* ProcessedMsgEvent */) {
-                        var msgProcessedEvent = mwEvent.event;
-                        _this.handleProcessedMsg(msgProcessedEvent);
-                    }
+                    if (mwEventType == 0 /* AnalyzerInfo */)
+                        _this.handleAnalyzerInfoEvent(mwEvent.event);
+                    else if (mwEventType == 2 /* LogEvent */)
+                        _this.handleLogEvent(mwEvent.event);
+                    else if (mwEventType == 1 /* ProcessedMsgEvent */)
+                        _this.handleProcessedMsg(mwEvent.event);
                 };
             };
             this.handleAnalyzerInfoEvent = function (analyzer) {
@@ -39,7 +34,7 @@ define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', '
                     idName: { id: analyzer.id, name: analyzer.name },
                     componentIdNames: componentIdNames,
                     msgProcessedRows: [],
-                    logEvents: [],
+                    logEventRows: [],
                     uniqueSenderNameById: {},
                     uniqueRecipientNameById: {}
                 };
@@ -49,6 +44,22 @@ define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', '
                 _this.setState(_this.state);
             };
             this.handleLogEvent = function (msg) {
+                var analyzerState = _this.state.analyzers[msg.analyzerId];
+                if (analyzerState) {
+                    //uniquecomponentid-sse ka midagi?
+                    analyzerState.logEventRows.push(_this.logEventToRow(msg));
+                    _this.setState(_this.state);
+                }
+            };
+            this.logEventToRow = function (msg) {
+                var componentIdNames = _this.state.analyzers[msg.analyzerId].componentIdNames;
+                return {
+                    logLevel: msg.logLevel,
+                    formattedDate: FormatUtil.formatDate(new Date(msg.time)),
+                    componentName: FormatUtil.getComponentName(msg.componentId, componentIdNames),
+                    formattedMsgBody: msg.msgBody,
+                    original: msg
+                };
             };
             this.handleProcessedMsg = function (msg) {
                 var analyzerState = _this.state.analyzers[msg.analyzerId];
@@ -73,12 +84,21 @@ define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', '
                 activeAnalyzerId: undefined,
                 analyzers: {},
                 filterState: {
-                    currentPair: {
-                        senderId: undefined,
-                        recipientId: undefined
+                    msgProcessedFilterState: {
+                        currentPair: {
+                            senderId: undefined,
+                            recipientId: undefined
+                        },
+                        addedPairs: [],
+                        startTime: undefined,
+                        endTime: undefined,
+                        searchText: undefined
                     },
-                    addedPairs: [],
-                    searchText: undefined
+                    logEventFilterState: {
+                        startTime: undefined,
+                        endTime: undefined,
+                        componentId: undefined
+                    }
                 }
             };
         }
@@ -118,7 +138,12 @@ define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', '
             };
             var mainContentProps = {
                 msgProcessedRows: this.state.activeAnalyzerId ? this.state.analyzers[this.state.activeAnalyzerId].msgProcessedRows : [],
-                filterState: this.state.filterState
+                logEventRows: this.state.activeAnalyzerId ? this.state.analyzers[this.state.activeAnalyzerId].logEventRows : [],
+                filterState: this.state.filterState,
+                onLogFilterStateChanged: function (newState) {
+                    _this.state.filterState.logEventFilterState = newState;
+                    _this.setState(_this.state);
+                }
             };
             return R.div({ id: 'wrapper' }, Sidebar.Component(sidebarProps), MainContent.Component(mainContentProps));
         };
