@@ -10,7 +10,7 @@ import ee.lis.interfaces.lis2a2.msg.LIS2A2ResultMsg;
 import ee.lis.interfaces.lis2a2.record.O;
 import ee.lis.interfaces.lis2a2.record.P;
 import ee.lis.interfaces.lis2a2.record.R;
-import ee.lis.util.CommonProtocol.DestinationConf;
+import ee.lis.util.CommonProtocol.RecipientConf;
 import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -45,10 +45,10 @@ public class StringToLIS2A2ConverterTest {
                     "R|2|^^^Bio|BH+^Beta Hemolytic|||N<CR>" +
                     "L|1<CR>");
 
-            final JavaTestKit destination = new JavaTestKit(system);
-            stringToLIS2A2Converter.tell(new DestinationConf(destination.getRef()), getRef());
+            final JavaTestKit recipient = new JavaTestKit(system);
+            stringToLIS2A2Converter.tell(new RecipientConf(recipient.getRef()), getRef());
             stringToLIS2A2Converter.tell(resultMessage, getRef());
-            LIS2A2ResultMsg received = destination.expectMsgClass(LIS2A2ResultMsg.class);
+            LIS2A2ResultMsg received = recipient.expectMsgClass(LIS2A2ResultMsg.class);
             List<P> patientRecords = received.getPatientRecords();
             Assert.assertEquals(1, patientRecords.size());
 

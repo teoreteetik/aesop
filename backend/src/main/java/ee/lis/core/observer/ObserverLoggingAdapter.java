@@ -22,13 +22,15 @@ public class ObserverLoggingAdapter extends AbstractActor {
         receive(
             ReceiveBuilder
                 .match(InitializeLogger.class, __ -> sender().tell(Logging.loggerInitialized(), self()))
-                .match(Logging.LogEvent.class, event ->
+                .match(Logging.LogEvent.class, event -> {
+                    System.out.println(event.logSource());
                     context().system().eventStream().publish(
                         new LogEvent(
                             logLevels.get(event.level()),
-                            event.message().toString(),
+                            event.message() == null ? null : event.message().toString(),
                             event.logSource(),
-                            event.timestamp())))
+                            event.timestamp()));
+                })
                 .build());
     }
 }

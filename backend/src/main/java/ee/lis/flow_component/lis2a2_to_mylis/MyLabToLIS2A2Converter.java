@@ -10,12 +10,12 @@ import ee.lis.interfaces.lis2a2.record.H;
 import ee.lis.interfaces.lis2a2.record.L;
 import ee.lis.interfaces.lis2a2.record.O;
 import ee.lis.interfaces.lis2a2.record.P;
-import ee.lis.util.CommonProtocol.DestinationConf;
+import ee.lis.util.CommonProtocol.RecipientConf;
 import java.util.Date;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
-public class MyLabToLIS2A2Converter extends FlowComponent<DestinationConf> {
+public class MyLabToLIS2A2Converter extends FlowComponent<RecipientConf> {
     @Override
     protected PartialFunction<Object, BoxedUnit> getBehaviour() {
         return ReceiveBuilder
@@ -25,7 +25,7 @@ public class MyLabToLIS2A2Converter extends FlowComponent<DestinationConf> {
 
     private void convertAndForwardOrderMsg(MyLabOrderMsg myLabOrderMsg) {
         LIS2A2OrderMsg lis2A2OrderMsg = myLabOrderMsgToLIS2A2OrderMsg(myLabOrderMsg);
-        conf.destination.tell(lis2A2OrderMsg, self());
+        conf.recipient.tell(lis2A2OrderMsg, self());
     }
 
     public LIS2A2OrderMsg myLabOrderMsgToLIS2A2OrderMsg(MyLabOrderMsg myLabOrderMsg) {

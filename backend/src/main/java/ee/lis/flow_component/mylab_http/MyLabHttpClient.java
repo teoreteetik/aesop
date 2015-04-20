@@ -30,7 +30,7 @@ public class MyLabHttpClient extends FlowComponent<MyLabHttpClientConf> {
     private void sendQuery(MyLabQueryMsg queryMsg) throws IOException {
         String queryResponse = executePOST(JsonUtil.asJson(queryMsg), conf.queryUrl);
         MyLabOrderMsg orderMsg = JsonUtil.fromJson(queryResponse, MyLabOrderMsg.class);
-        conf.destination.tell(orderMsg, self());
+        conf.recipient.tell(orderMsg, self());
     }
 
     private String executePOST(String requestBody, String targetUrl) throws IOException {

@@ -11,13 +11,13 @@ import ee.lis.interfaces.lis2a2.record.LIS2A2Record;
 import ee.lis.interfaces.lis2a2.record.O;
 import ee.lis.interfaces.lis2a2.record.Q;
 import ee.lis.interfaces.lis2a2.record.R;
-import ee.lis.util.CommonProtocol.DestinationConf;
+import ee.lis.util.CommonProtocol.RecipientConf;
 import java.util.ArrayList;
 import java.util.List;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
-public class StringToLIS2A2Converter extends FlowComponent<DestinationConf> {
+public class StringToLIS2A2Converter extends FlowComponent<RecipientConf> {
     @Override
     protected PartialFunction<Object, BoxedUnit> getBehaviour() {
         return ReceiveBuilder
@@ -27,7 +27,7 @@ public class StringToLIS2A2Converter extends FlowComponent<DestinationConf> {
 
     private void convertAndForward(String msgAsString) {
         LIS2A2Msg lis2A2Msg = stringMsgToLIS2A2Msg(msgAsString);
-        conf.destination.tell(lis2A2Msg, self());
+        conf.recipient.tell(lis2A2Msg, self());
     }
 
     public LIS2A2Msg stringMsgToLIS2A2Msg(String msgAsString) {

@@ -2,12 +2,12 @@ package ee.lis.flow_component.lis2a2_to_string;
 
 import akka.japi.pf.ReceiveBuilder;
 import ee.lis.interfaces.lis2a2.msg.LIS2A2Msg;
-import ee.lis.util.CommonProtocol.DestinationConf;
+import ee.lis.util.CommonProtocol.RecipientConf;
 import ee.lis.core.FlowComponent;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
-public class LIS2A2ToStringConverter extends FlowComponent<DestinationConf> {
+public class LIS2A2ToStringConverter extends FlowComponent<RecipientConf> {
 
     @Override
     public PartialFunction<Object, BoxedUnit> getBehaviour() {
@@ -17,6 +17,6 @@ public class LIS2A2ToStringConverter extends FlowComponent<DestinationConf> {
     }
 
     private void convertAndForward(LIS2A2Msg message) {
-        conf.destination.tell(message.asString(), self());
+        conf.recipient.tell(message.asString(), self());
     }
 }

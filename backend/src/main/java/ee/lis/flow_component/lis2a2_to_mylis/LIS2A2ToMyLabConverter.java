@@ -9,13 +9,13 @@ import ee.lis.interfaces.lis2a2.msg.LIS2A2QueryMsg;
 import ee.lis.interfaces.lis2a2.msg.LIS2A2ResultMsg;
 import ee.lis.interfaces.lis2a2.record.O;
 import ee.lis.interfaces.lis2a2.record.P;
-import ee.lis.util.CommonProtocol.DestinationConf;
+import ee.lis.util.CommonProtocol.RecipientConf;
 import java.util.ArrayList;
 import java.util.List;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
-public class LIS2A2ToMyLabConverter extends FlowComponent<DestinationConf> {
+public class LIS2A2ToMyLabConverter extends FlowComponent<RecipientConf> {
     @Override
     protected PartialFunction<Object, BoxedUnit> getBehaviour() {
         return ReceiveBuilder
@@ -26,7 +26,7 @@ public class LIS2A2ToMyLabConverter extends FlowComponent<DestinationConf> {
 
     private void convertAndForwardResult(LIS2A2ResultMsg lis2A2ResultMsg) {
         for (MyLabResultMsg myLabResultMsg : lis2A2ResultMsgToMyLabResultMsgs(lis2A2ResultMsg))
-            conf.destination.tell(myLabResultMsg, self());
+            conf.recipient.tell(myLabResultMsg, self());
     }
 
     public List<MyLabResultMsg> lis2A2ResultMsgToMyLabResultMsgs(LIS2A2ResultMsg lis2A2ResultMsg) {
@@ -52,7 +52,7 @@ public class LIS2A2ToMyLabConverter extends FlowComponent<DestinationConf> {
 
     private void convertAndForwardQuery(LIS2A2QueryMsg lis2A2QueryMsg) {
         for (MyLabQueryMsg myLabQueryMsg : lis2A2QueryMsgToMyLabQueryMsgs(lis2A2QueryMsg))
-            conf.destination.tell(myLabQueryMsg, self());
+            conf.recipient.tell(myLabQueryMsg, self());
     }
 
     public List<MyLabQueryMsg> lis2A2QueryMsgToMyLabQueryMsgs(LIS2A2QueryMsg lis2A2QueryMsg) {

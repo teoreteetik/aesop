@@ -13,12 +13,12 @@ public class MyLabHttpClientConf implements ConfMsg {
 
     public final String resultUrl;
     public final String queryUrl;
-    public final ActorRef destination;
+    public final ActorRef recipient;
 
-    public MyLabHttpClientConf(String resultUrl, String queryUrl, ActorRef destination) {
+    public MyLabHttpClientConf(String resultUrl, String queryUrl, ActorRef recipient) {
         this.resultUrl = resultUrl;
         this.queryUrl = queryUrl;
-        this.destination = destination;
+        this.recipient = recipient;
     }
 
     @Override
@@ -26,21 +26,21 @@ public class MyLabHttpClientConf implements ConfMsg {
         return "MyLabHttpClientConf{" +
             "resultUrl='" + resultUrl + '\'' +
             ", queryUrl='" + queryUrl + '\'' +
-            ", destination=" + destination +
+            ", recipient=" + recipient +
             '}';
     }
 
     public enum ConfKey {
         resultUrl,
         queryUrl,
-        destination,
+        recipient,
     }
 
     public static MyLabHttpClientConf create(Config config, ActorContext ctx) {
         String resultUrl = config.getString(ConfKey.resultUrl.name());
         String queryUrl = config.getString(ConfKey.queryUrl.name());
         ActorRef destination;
-        Future<ActorRef> destinationFuture = ctx.actorSelection(config.getString(ConfKey.destination.name())).resolveOne(Duration.apply(1, TimeUnit.SECONDS));
+        Future<ActorRef> destinationFuture = ctx.actorSelection(config.getString(ConfKey.recipient.name())).resolveOne(Duration.apply(1, TimeUnit.SECONDS));
         try {
             destination = Await.result(destinationFuture, Duration.apply(1, TimeUnit.SECONDS));
         } catch (Exception e) {
