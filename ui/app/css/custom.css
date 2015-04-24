@@ -3,20 +3,17 @@
     left:0;
     top:0px;
     bottom: 0;
-    width: 350px;
+    width: 250px;
     background: #000;
     padding: 0 10px;
 }
 .control-label {
     color: #fff;
 }
-.white {
-    color: #fff;
-}
 
 #main {
     position: absolute;
-    left:350px;
+    left:250px;
     top:0px;
     right:0;
     bottom:0;
@@ -31,10 +28,11 @@
 
 .sidebar-nav ul {
     list-style: none;
+    padding-left: 20px;
 }
 
 .sidebar-nav li {
-    text-indent: 20px;
+    text-indent: 10px;
     line-height: 40px;
 }
 

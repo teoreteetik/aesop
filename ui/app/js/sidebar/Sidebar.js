@@ -1,5 +1,4 @@
-/// <reference path="../../types/react/react.d.ts" />
-/// <reference path="../../types/lib.d.ts" />
+/// <reference path="../../types/common.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -32,11 +31,7 @@ define(["require", "exports", 'react', './AnalyzersList', './filter/FilterSideba
                 return AnalyzersList.Component(analyzersListProps);
             };
             this.getFilterComponent = function () {
-                var analyzerState;
-                _this.props.analyzers.forEach(function (a) {
-                    if (a.idName.id === _this.props.activeAnalyzerId)
-                        analyzerState = a;
-                });
+                var analyzerState = _.find(_this.props.analyzers, function (analyzer) { return analyzer.idName.id === _this.props.activeAnalyzerId; });
                 var filterProps = {
                     uniqueSenderIdNames: analyzerState.uniqueSenderIdNames,
                     uniqueRecipientIdNames: analyzerState.uniqueRecipientIdNames,
@@ -66,7 +61,7 @@ define(["require", "exports", 'react', './AnalyzersList', './filter/FilterSideba
             };
         }
         Sidebar.prototype.render = function () {
-            return R.div({ id: 'sidebar' }, R.ul({ className: 'sidebar-nav' }, R.li({ className: 'sidebar-brand' }, R.a({ href: '#' }, 'Aesop')), R.li({}, this.getVisibleButtons())), this.getCurrentContent());
+            return (R.div({ id: 'sidebar' }, R.ul({ className: 'sidebar-nav' }, R.li({ className: 'sidebar-brand' }, R.a({ href: '#' }, 'Aesop')), R.li({}, this.getVisibleButtons())), this.getCurrentContent()));
         };
         return Sidebar;
     })(React.Component);

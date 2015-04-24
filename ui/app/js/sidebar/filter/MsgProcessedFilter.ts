@@ -1,14 +1,11 @@
-/// <reference path="../../../types/react/react.d.ts" />
-/// <reference path="../../../types/lodash/lodash.d.ts" />
+/// <reference path="../../../types/common.d.ts" />
 
 import React = require('react');
 import IdName = require('../../util/IdName');
-import MultiSelect = require('../../util/MultiSelect');
-import _ = require('lodash');
+import DateTimeInput = require('./DateTimeInput');
 var BS = require('react-bootstrap');
 var Input = React.createFactory(BS.Input);
 var R = React.DOM;
-import DateTimeInput = require('./DateTimeInput');
 
 export interface FilterState {
     currentPair: Pair;
@@ -32,18 +29,17 @@ export interface Props {
 
 class MsgProcessedFilter extends React.Component<Props, {}> {
 
-    private getPartyDropdown = (label:string, currentValue:string, items:IdName[], newPairGetter:(selectedValue:string) => Pair) => {
-        var options = items.map(idName =>
-            R.option({title: idName.id, value: idName.id},
-                idName.name));
-        options.unshift(R.option({title: 'any', value: ''}, ''));
+    private getComponentDropdown = (label:string, currentValue:string, items:IdName[], currentPairGetter:(selectedValue:string) => Pair) => {
+        var options = items.map(idName => R.option({ title: idName.id, value: idName.id }, idName.name));
+        options.unshift(R.option({ title: 'any', value: '' }, ''));
+
         var fs = this.props.filterState;
         var onChange = (e) => {
             var selectedValue = e.target.value;
             this.props.onFilterStateChanged({
                 startTime: undefined,
                 endTime: undefined,
-                currentPair: newPairGetter(selectedValue),
+                currentPair: currentPairGetter(selectedValue),
                 addedPairs: fs.addedPairs,
                 searchText: fs.searchText
             });
@@ -57,7 +53,7 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
     };
 
     private getSenderDropDown = () => {
-        return this.getPartyDropdown('Sender',
+        return this.getComponentDropdown('Sender',
                                      this.props.filterState.currentPair.senderId,
                                      this.props.uniqueSenderIdNames,
                                      (selectedValue: string) => {
@@ -68,7 +64,7 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
         });
     };
     private getRecipientDropdown = () => {
-        return this.getPartyDropdown('Recipient',
+        return this.getComponentDropdown('Recipient',
                                      this.props.filterState.currentPair.recipientId,
                                      this.props.uniqueRecipientIdNames,
                                      (selectedValue: string) => {
@@ -79,29 +75,36 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
         });
     };
 
-    render() {
+    private getAddedComponentPairs = () => {
         var fs = this.props.filterState;
-        var addedPairs = fs.addedPairs.map((pair, index) => {
-            var senderName = pair.senderId ? _.find(this.props.uniqueSenderIdNames, idName => idName.id === pair.senderId).name : 'Any';
-            var recipientName = pair.recipientId ? _.find(this.props.uniqueRecipientIdNames, idName => idName.id === pair.recipientId).name : 'Any';
-            return R.div({},
-                R.div({className: 'white'}, 'Sender: ' + senderName),
-                R.div({className: 'white'}, 'Recipient: ' + recipientName),
-                R.button({
-                    onClick: () => {
-                        var newPairs = fs.addedPairs.splice(0);
-                        newPairs.splice(index, 1);
-                        this.props.onFilterStateChanged({
-                            startTime: fs.startTime,
-                            endTime: fs.endTime,
-                            currentPair: fs.currentPair,
-                            addedPairs: newPairs,
-                            searchText: fs.searchText
-                        });
-                    }
-                }, 'Delete'))
-        });
-        return R.div({},
+        return (
+            fs.addedPairs.map((pair, index) => {
+                var senderName = pair.senderId ? _.find(this.props.uniqueSenderIdNames, idName => idName.id === pair.senderId).name
+                                               : 'Any';
+                var recipientName = pair.recipientId ? _.find(this.props.uniqueRecipientIdNames, idName => idName.id === pair.recipientId).name
+                                                     : 'Any';
+                return R.div({},
+                    R.div({className: 'control-label'}, 'Sender: ' + senderName),
+                    R.div({className: 'control-label'}, 'Recipient: ' + recipientName),
+                    R.button({
+                        onClick: () => {
+                            var newPairs = fs.addedPairs.splice(0);
+                            newPairs.splice(index, 1);
+                            this.props.onFilterStateChanged({
+                                startTime: fs.startTime,
+                                endTime: fs.endTime,
+                                currentPair: fs.currentPair,
+                                addedPairs: newPairs,
+                                searchText: fs.searchText
+                            });
+                        }
+                    }, 'Delete'))
+                })
+        );
+    };
+
+    private getStartDateTimeInput = () => {
+        return (
             DateTimeInput.Component({
                 value: this.props.filterState.startTime,
                 label: 'Start',
@@ -115,7 +118,12 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                         searchText: fs.searchText
                     });
                 }
-            }),
+            })
+        );
+    };
+
+    private getEndDateTimeInput = () =>{
+        return (
             DateTimeInput.Component({
                 value: this.props.filterState.endTime,
                 label: 'End',
@@ -129,10 +137,13 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                         searchText: fs.searchText
                     });
                 }
-            }),
-            addedPairs,
-            this.getSenderDropDown(),
-            this.getRecipientDropdown(),
+            })
+        );
+    };
+
+    private getAddComponentPairButton = () => {
+        var fs = this.props.filterState;
+        return (
             R.button({
                 onClick: () => {
                     var newPairs = fs.addedPairs.splice(0);
@@ -151,7 +162,13 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                         searchText: fs.searchText
                     });
                 }
-            }, 'Add'),
+            }, 'Add')
+        )
+    };
+
+    private getMsgBodySearchInput = () => {
+        var fs = this.props.filterState;
+        return (
             Input({
                 type: 'text', label: 'Message body', onChange: (event) => {
                     this.props.onFilterStateChanged({
@@ -162,7 +179,21 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                         searchText: event.target.value
                     });
                 }
-            }));
+            })
+        );
+    };
+
+    render() {
+        return (
+            R.div({},
+                this.getStartDateTimeInput(),
+                this.getEndDateTimeInput(),
+                this.getAddedComponentPairs(),
+                this.getSenderDropDown(),
+                this.getRecipientDropdown(),
+                this.getAddComponentPairButton(),
+                this.getMsgBodySearchInput())
+        );
     }
 }
 export var Component = React.createFactory(MsgProcessedFilter);

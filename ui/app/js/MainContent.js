@@ -1,4 +1,4 @@
-/// <reference path="../types/react/react.d.ts" />
+/// <reference path="../types/common.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -12,56 +12,64 @@ define(["require", "exports", 'react', './ProcessedMsgsTable', './LogEventsTable
         function MainContent(props) {
             var _this = this;
             _super.call(this, props);
-            this._update = function () {
+            this.attatchResizeHandler = function () {
                 var win = window;
-                var widthOffset = 400;
+                if (win.addEventListener)
+                    win.addEventListener('resize', _this._onResize, false);
+                else if (win.attachEvent)
+                    win.attachEvent('onresize', _this._onResize);
+                else
+                    win.onresize = _this._onResize;
+            };
+            this.update = function () {
+                var win = window;
+                var widthOffset = 300;
                 _this.state.tableWidth = win.innerWidth - widthOffset;
                 _this.state.msgProcessedTableHeight = Math.round(win.innerHeight * 0.6) - 20;
                 _this.state.logEventsTableHeight = Math.round(win.innerHeight * 0.4) - 20;
                 _this.setState(_this.state);
             };
             this._onResize = function () {
-                clearTimeout(_this._updateTimerId);
-                _this._updateTimerId = setTimeout(_this._update, 16);
+                clearTimeout(_this.updateTimerId);
+                _this.updateTimerId = setTimeout(_this.update, 16);
             };
-            this.getUpperComponent = function () {
-                if (_this.state.msgDetails) {
-                    return MsgDetailsPane.Component({
-                        row: _this.state.msgDetails,
-                        height: _this.state.msgProcessedTableHeight,
-                        onBackClicked: function () {
-                            _this.props.onLogFilterStateChanged({
-                                startTime: undefined,
-                                endTime: undefined,
-                                componentId: undefined
-                            });
-                            _this.state.msgDetails = undefined;
-                            _this.setState(_this.state);
-                        }
-                    });
-                }
-                else {
-                    return ProcessedMsgsTable.Component({
-                        rows: _this.props.msgProcessedRows,
-                        tableWidth: _this.state.tableWidth,
-                        tableHeight: _this.state.msgProcessedTableHeight,
-                        filterState: _this.props.filterState.msgProcessedFilterState,
-                        scrollTop: _this.state.msgProcessedTableScrollTop,
-                        onScrollChanged: function (scrollTop) {
-                            _this.state.msgProcessedTableScrollTop = scrollTop;
-                            _this.setState(_this.state);
-                        },
-                        onRowDoubleClicked: function (row) {
-                            _this.state.msgDetails = row;
-                            _this.setState(_this.state);
-                            _this.props.onLogFilterStateChanged({
-                                startTime: row.original.processingStartTime,
-                                endTime: row.original.processingEndTime,
-                                componentId: row.original.recipientComponentId
-                            });
-                        }
-                    });
-                }
+            this.getUpperComponent = function () { return _this.state.msgDetails ? _this.getMsgDetailsPane() : _this.getProcessedMsgsTable(); };
+            this.getMsgDetailsPane = function () {
+                return (MsgDetailsPane.Component({
+                    row: _this.state.msgDetails,
+                    height: _this.state.msgProcessedTableHeight,
+                    onBackClicked: function () {
+                        _this.props.onLogFilterStateChanged({
+                            startTime: undefined,
+                            endTime: undefined,
+                            componentId: undefined
+                        });
+                        _this.state.msgDetails = undefined;
+                        _this.setState(_this.state);
+                    }
+                }));
+            };
+            this.getProcessedMsgsTable = function () {
+                return (ProcessedMsgsTable.Component({
+                    rows: _this.props.msgProcessedRows,
+                    tableWidth: _this.state.tableWidth,
+                    tableHeight: _this.state.msgProcessedTableHeight,
+                    filterState: _this.props.filterState.msgProcessedFilterState,
+                    scrollTop: _this.state.msgProcessedTableScrollTop,
+                    onScrollChanged: function (scrollTop) {
+                        _this.state.msgProcessedTableScrollTop = scrollTop;
+                        _this.setState(_this.state);
+                    },
+                    onRowDoubleClicked: function (row) {
+                        _this.state.msgDetails = row;
+                        _this.setState(_this.state);
+                        _this.props.onLogFilterStateChanged({
+                            startTime: row.original.processingStartTime,
+                            endTime: row.original.processingEndTime,
+                            componentId: row.original.recipientComponentId
+                        });
+                    }
+                }));
             };
             this.getLogEventsTable = function () {
                 return LogEventsTable.Component({
@@ -80,20 +88,11 @@ define(["require", "exports", 'react', './ProcessedMsgsTable', './LogEventsTable
             };
         }
         MainContent.prototype.componentDidMount = function () {
-            this._update();
-            this._attatchResizeHandler();
-        };
-        MainContent.prototype._attatchResizeHandler = function () {
-            var win = window;
-            if (win.addEventListener)
-                win.addEventListener('resize', this._onResize, false);
-            else if (win.attachEvent)
-                win.attachEvent('onresize', this._onResize);
-            else
-                win.onresize = this._onResize;
+            this.update();
+            this.attatchResizeHandler();
         };
         MainContent.prototype.render = function () {
-            return R.div({ id: 'main' }, this.getUpperComponent(), this.getLogEventsTable());
+            return (R.div({ id: 'main' }, this.getUpperComponent(), this.getLogEventsTable()));
         };
         return MainContent;
     })(React.Component);

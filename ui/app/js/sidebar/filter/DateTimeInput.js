@@ -1,7 +1,4 @@
-/// <reference path="../../../types/react/react.d.ts" />
-/// <reference path="../../../types/lodash/lodash.d.ts" />
-/// <reference path="../../../types/moment/moment.d.ts" />
-/// <reference path="../../../types/lib.d.ts" />
+/// <reference path="../../../types/common.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -13,11 +10,9 @@ define(["require", "exports", 'react', 'moment'], function (require, exports, Re
     var Input = React.createFactory(BS.Input);
     var Row = React.createFactory(BS.Row);
     var Col = React.createFactory(BS.Col);
-    var Button = React.createFactory(BS.Button);
-    var R = React.DOM;
-    var _DateTimeInput = (function (_super) {
-        __extends(_DateTimeInput, _super);
-        function _DateTimeInput(props) {
+    var DateTimeInput = (function (_super) {
+        __extends(DateTimeInput, _super);
+        function DateTimeInput(props) {
             var _this = this;
             _super.call(this, props);
             this.onChange = function (event) {
@@ -43,25 +38,25 @@ define(["require", "exports", 'react', 'moment'], function (require, exports, Re
                 };
             }
         }
-        _DateTimeInput.prototype.render = function () {
-            return Row({}, Col({ xs: 6, style: { paddingRight: 0 } }, Input({
+        DateTimeInput.prototype.render = function () {
+            return (Row({}, Col({ xs: 5, style: { paddingRight: 0 } }, Input({
                 ref: 'timeInput',
                 label: this.props.label + ' time',
                 type: 'text',
                 placeholder: 'HH:mm:ss',
                 onChange: this.onChange,
                 value: this.state.timeString
-            })), Col({ xs: 6 }, Input({
+            })), Col({ xs: 7 }, Input({
                 ref: 'dateInput',
                 label: this.props.label + ' date',
                 type: 'text',
                 placeholder: 'dd.MM.yyyy',
                 onChange: this.onChange,
                 value: this.state.dateString
-            })));
+            }))));
         };
-        return _DateTimeInput;
+        return DateTimeInput;
     })(React.Component);
-    exports.Component = React.createFactory(_DateTimeInput);
+    exports.Component = React.createFactory(DateTimeInput);
 });
 //# sourceMappingURL=DateTimeInput.js.map

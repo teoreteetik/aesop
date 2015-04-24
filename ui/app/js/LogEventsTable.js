@@ -1,6 +1,4 @@
-/// <reference path="../types/react/react.d.ts" />
-/// <reference path="../types/lodash/lodash.d.ts" />
-/// <reference path="../types/lib.d.ts" />
+/// <reference path="../types/common.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -21,10 +19,16 @@ define(["require", "exports", 'react'], function (require, exports, React) {
         function LogEventsTable(props) {
             var _this = this;
             _super.call(this, props);
-            this._onColumnResizeEndCallback = function (newColumnWidth, dataKey) {
+            this.onColumnResizeEndCallback = function (newColumnWidth, dataKey) {
                 _this.state.isColumnResizing = false;
                 _this.state.columnWidths[dataKey] = newColumnWidth;
                 _this.setState(_this.state);
+            };
+            this.getFilteredRows = function () {
+                var passesStartTimeFilter = function (row) { return !_this.props.filterState.startTime || row.original.time >= _this.props.filterState.startTime; };
+                var passesEndTimeFilter = function (row) { return !_this.props.filterState.endTime || row.original.time <= _this.props.filterState.endTime; };
+                var passesComponentFilter = function (row) { return !_this.props.filterState.componentId || row.original.componentId === _this.props.filterState.componentId; };
+                return (_this.props.rows.filter(function (row) { return passesComponentFilter(row) && passesStartTimeFilter(row) && passesEndTimeFilter(row); }));
             };
             this.state = {
                 isColumnResizing: false,
@@ -37,22 +41,16 @@ define(["require", "exports", 'react'], function (require, exports, React) {
             };
         }
         LogEventsTable.prototype.render = function () {
-            var _this = this;
-            var passesStartTimeFilter = function (row) { return !_this.props.filterState.startTime || row.original.time >= _this.props.filterState.startTime; };
-            var passesEndTimeFilter = function (row) { return !_this.props.filterState.endTime || row.original.time <= _this.props.filterState.endTime; };
-            var passesComponentFilter = function (row) { return !_this.props.filterState.componentId || row.original.componentId === _this.props.filterState.componentId; };
-            var rows = this.props.rows.filter(function (row) { return passesComponentFilter(row) && passesStartTimeFilter(row) && passesEndTimeFilter(row); });
-            var rowGetter = function (index) {
-                return rows[index];
-            };
-            return Table({
+            var rows = this.getFilteredRows();
+            var rowGetter = function (index) { return rows[index]; };
+            return (Table({
                 rowHeight: 30,
                 rowGetter: rowGetter,
                 rowsCount: this.props.rows.length,
                 width: this.props.tableWidth,
                 height: this.props.tableHeight,
                 isColumnResizing: this.state.isColumnResizing,
-                onColumnResizeEndCallback: this._onColumnResizeEndCallback,
+                onColumnResizeEndCallback: this.onColumnResizeEndCallback,
                 headerHeight: 40,
                 onRowClick: function (event, index, data) {
                 }
@@ -76,7 +74,7 @@ define(["require", "exports", 'react'], function (require, exports, React) {
                 width: this.state.columnWidths[formattedMsgBodyDK],
                 isResizable: true,
                 dataKey: formattedMsgBodyDK
-            }));
+            })));
         };
         return LogEventsTable;
     })(React.Component);

@@ -1,22 +1,10 @@
+/// <reference path="../../types/common.d.ts" />
+
 import IdName = require('./IdName');
+import moment = require('moment');
 
 export var formatDate = (date: Date): string => {
-    var day = date.getDate();
-    var month = date.getMonth() + 1;
-    var year = date.getFullYear();
-    var hour = date.getHours();
-    var minute = date.getMinutes();
-    var second = date.getSeconds();
-    var milli = date.getMilliseconds();
-    var prepend0 = (num: number) => (num <= 9 ? '0' + num : num);
-    return '' +
-        prepend0(hour) + ':' +
-        prepend0(minute) + ':' +
-        prepend0(second) + ':' +
-        milli + ' ' +
-        prepend0(day) + '/' +
-        prepend0(month) + '/' +
-        year;
+    return moment(date).format('HH:mm:ss DD.MM.YYYY');
 };
 
 export var getComponentName = (id:string, idNames: IdName[]): string => {
@@ -30,5 +18,6 @@ export var getComponentName = (id:string, idNames: IdName[]): string => {
 };
 
 export var truncate = (str: string, maxLength: number): string => {
-    return (str.length > maxLength) ? (str.substr(0, maxLength - 3) + '...') : str;
+    return (str.length > maxLength) ? (str.substr(0, maxLength - 3) + '...')
+                                    : str;
 };

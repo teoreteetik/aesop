@@ -1,12 +1,11 @@
-/// <reference path="../types/react/react.d.ts" />
-/// <reference path="../types/lib.d.ts" />
+/// <reference path="../types/common.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', './util/FormatUtil', './MainContent'], function (require, exports, React, WebSocketMsgs, Sidebar, FormatUtil, MainContent) {
+define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/Sidebar', './util/FormatUtil', './MainContent'], function (require, exports, React, _, WebSocketMsgs, Sidebar, FormatUtil, MainContent) {
     var R = React.DOM;
     var _Page = (function (_super) {
         __extends(_Page, _super);
@@ -28,8 +27,7 @@ define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', '
             };
             this.handleAnalyzerInfoEvent = function (analyzer) {
                 var componentIdNames = [];
-                for (var id in analyzer.componentNameById)
-                    componentIdNames.push({ id: id, name: analyzer.componentNameById[id] });
+                _.forOwn(analyzer.componentNameById, function (name, id) { return componentIdNames.push({ id: id, name: name }); });
                 var analyzerState = {
                     idName: { id: analyzer.id, name: analyzer.name },
                     componentIdNames: componentIdNames,
@@ -80,6 +78,45 @@ define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', '
                     original: msg
                 };
             };
+            this.getSidebarProps = function () {
+                var analyzers = [];
+                _.forOwn(_this.state.analyzers, function (analyzer, analyzerId) {
+                    var uniqueSenderIdNames = [];
+                    _.forOwn(analyzer.uniqueSenderNameById, function (name, id) { return uniqueSenderIdNames.push({ id: id, name: name }); });
+                    var uniqueRecipientIdNames = [];
+                    _.forOwn(analyzer.uniqueRecipientNameById, function (name, id) { return uniqueRecipientIdNames.push({ id: id, name: name }); });
+                    analyzers.push({
+                        idName: analyzer.idName,
+                        componentIdNames: analyzer.componentIdNames,
+                        uniqueSenderIdNames: uniqueSenderIdNames,
+                        uniqueRecipientIdNames: uniqueRecipientIdNames
+                    });
+                });
+                return {
+                    activeAnalyzerId: _this.state.activeAnalyzerId,
+                    analyzers: analyzers,
+                    onAnalyzerClicked: function (id) {
+                        _this.state.activeAnalyzerId = id;
+                        _this.setState(_this.state);
+                    },
+                    filterState: _this.state.filterState,
+                    onFilterStateChanged: function (filterState) {
+                        _this.state.filterState = filterState;
+                        _this.setState(_this.state);
+                    }
+                };
+            };
+            this.getMainContentProps = function () {
+                return {
+                    msgProcessedRows: _this.state.activeAnalyzerId ? _this.state.analyzers[_this.state.activeAnalyzerId].msgProcessedRows : [],
+                    logEventRows: _this.state.activeAnalyzerId ? _this.state.analyzers[_this.state.activeAnalyzerId].logEventRows : [],
+                    filterState: _this.state.filterState,
+                    onLogFilterStateChanged: function (newState) {
+                        _this.state.filterState.logEventFilterState = newState;
+                        _this.setState(_this.state);
+                    }
+                };
+            };
             this.state = {
                 activeAnalyzerId: undefined,
                 analyzers: {},
@@ -106,46 +143,7 @@ define(["require", "exports", 'react', './WebSocketMsgs', './sidebar/Sidebar', '
             this.initSocket();
         };
         _Page.prototype.render = function () {
-            var _this = this;
-            var analyzers = [];
-            for (var id in this.state.analyzers) {
-                var a = this.state.analyzers[id];
-                var uniqueSenderIdNames = [];
-                for (var id in a.uniqueSenderNameById)
-                    uniqueSenderIdNames.push({ id: id, name: a.uniqueSenderNameById[id] });
-                var uniqueRecipientIdNames = [];
-                for (var id in a.uniqueRecipientNameById)
-                    uniqueRecipientIdNames.push({ id: id, name: a.uniqueRecipientNameById[id] });
-                analyzers.push({
-                    idName: a.idName,
-                    componentIdNames: a.componentIdNames,
-                    uniqueSenderIdNames: uniqueSenderIdNames,
-                    uniqueRecipientIdNames: uniqueRecipientIdNames
-                });
-            }
-            var sidebarProps = {
-                activeAnalyzerId: this.state.activeAnalyzerId,
-                analyzers: analyzers,
-                onAnalyzerClicked: function (id) {
-                    _this.state.activeAnalyzerId = id;
-                    _this.setState(_this.state);
-                },
-                filterState: this.state.filterState,
-                onFilterStateChanged: function (filterState) {
-                    _this.state.filterState = filterState;
-                    _this.setState(_this.state);
-                }
-            };
-            var mainContentProps = {
-                msgProcessedRows: this.state.activeAnalyzerId ? this.state.analyzers[this.state.activeAnalyzerId].msgProcessedRows : [],
-                logEventRows: this.state.activeAnalyzerId ? this.state.analyzers[this.state.activeAnalyzerId].logEventRows : [],
-                filterState: this.state.filterState,
-                onLogFilterStateChanged: function (newState) {
-                    _this.state.filterState.logEventFilterState = newState;
-                    _this.setState(_this.state);
-                }
-            };
-            return R.div({ id: 'wrapper' }, Sidebar.Component(sidebarProps), MainContent.Component(mainContentProps));
+            return (R.div({ id: 'wrapper' }, Sidebar.Component(this.getSidebarProps()), MainContent.Component(this.getMainContentProps())));
         };
         return _Page;
     })(React.Component);

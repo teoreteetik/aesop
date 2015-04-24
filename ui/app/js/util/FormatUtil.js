@@ -1,14 +1,7 @@
-define(["require", "exports"], function (require, exports) {
+/// <reference path="../../types/common.d.ts" />
+define(["require", "exports", 'moment'], function (require, exports, moment) {
     exports.formatDate = function (date) {
-        var day = date.getDate();
-        var month = date.getMonth() + 1;
-        var year = date.getFullYear();
-        var hour = date.getHours();
-        var minute = date.getMinutes();
-        var second = date.getSeconds();
-        var milli = date.getMilliseconds();
-        var prepend0 = function (num) { return (num <= 9 ? '0' + num : num); };
-        return '' + prepend0(hour) + ':' + prepend0(minute) + ':' + prepend0(second) + ':' + milli + ' ' + prepend0(day) + '/' + prepend0(month) + '/' + year;
+        return moment(date).format('HH:mm:ss DD.MM.YYYY');
     };
     exports.getComponentName = function (id, idNames) {
         for (var i = 0; i < idNames.length; i++)

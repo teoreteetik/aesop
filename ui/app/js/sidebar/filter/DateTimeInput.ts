@@ -1,17 +1,11 @@
-/// <reference path="../../../types/react/react.d.ts" />
-/// <reference path="../../../types/lodash/lodash.d.ts" />
-/// <reference path="../../../types/moment/moment.d.ts" />
-/// <reference path="../../../types/lib.d.ts" />
+/// <reference path="../../../types/common.d.ts" />
 
 import React = require('react');
-import _ = require('lodash');
+import moment = require('moment');
 var BS = require('react-bootstrap');
 var Input = React.createFactory(BS.Input);
 var Row = React.createFactory(BS.Row);
 var Col = React.createFactory(BS.Col);
-var Button = React.createFactory(BS.Button);
-var R = React.DOM;
-import moment = require('moment');
 
 export interface Props {
     label: string;
@@ -24,7 +18,7 @@ interface State {
     dateString: string;
 }
 
-class _DateTimeInput extends React.Component<Props, State> {
+class DateTimeInput extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         if (props.value) {
@@ -50,8 +44,9 @@ class _DateTimeInput extends React.Component<Props, State> {
             this.props.onChange(undefined);
     };
     render() {
-        return Row({},
-                Col({xs: 6, style: {paddingRight: 0}},
+        return (
+            Row({},
+                Col({ xs: 5, style: { paddingRight: 0 } },
                     Input({
                         ref: 'timeInput',
                         label: this.props.label + ' time',
@@ -61,7 +56,7 @@ class _DateTimeInput extends React.Component<Props, State> {
                         value: this.state.timeString
                     })
                 ),
-                Col({xs: 6},
+                Col({ xs: 7 },
                     Input({
                         ref: 'dateInput',
                         label: this.props.label + ' date',
@@ -70,7 +65,8 @@ class _DateTimeInput extends React.Component<Props, State> {
                         onChange: this.onChange,
                         value: this.state.dateString
                     })
-                ));
+                ))
+        );
     }
 }
-export var Component = React.createFactory(_DateTimeInput);
+export var Component = React.createFactory(DateTimeInput);

@@ -1,7 +1,7 @@
-/// <reference path="../types/react/react.d.ts" />
-/// <reference path="../types/lib.d.ts" />
+/// <reference path="../types/common.d.ts" />
 
 import React = require('react');
+import _ = require('lodash');
 import WebSocketMsgs = require('./WebSocketMsgs');
 import Sidebar = require('./sidebar/Sidebar');
 import FormatUtil = require('./util/FormatUtil');
@@ -10,7 +10,6 @@ import ProcessedMsgsTable = require('./ProcessedMsgsTable');
 import LogEventsTable = require('./LogEventsTable');
 import MainContent = require('./MainContent');
 import FilterSidebar = require('./sidebar/filter/FilterSidebar');
-
 var R = React.DOM;
 
 interface PageState {
@@ -55,9 +54,10 @@ class _Page extends React.Component<{}, PageState> {
     componentDidMount() {
         this.initSocket();
     }
+
     private initSocket = (): void => {
         var socket = new WebSocket("ws://127.0.0.1:8900");
-        socket.onmessage = (wsEvent:MessageEvent) => {
+        socket.onmessage = (wsEvent: MessageEvent) => {
             var mwEvent:WebSocketMsgs.WebSocketMsg = JSON.parse(event.data);
             var mwEventType = WebSocketMsgs.EventType[mwEvent.eventType];
             if (mwEventType == WebSocketMsgs.EventType.AnalyzerInfo)
@@ -69,12 +69,12 @@ class _Page extends React.Component<{}, PageState> {
 
         };
     };
-    private handleAnalyzerInfoEvent= (analyzer:WebSocketMsgs.AnalyzerInfo): void => {
+
+    private handleAnalyzerInfoEvent= (analyzer: WebSocketMsgs.AnalyzerInfo): void => {
         var componentIdNames: IdName[] = [];
-        for (var id in analyzer.componentNameById)
-            componentIdNames.push({id: id, name: analyzer.componentNameById[id]});
+        _.forOwn(analyzer.componentNameById, (name, id) => componentIdNames.push({ id: id, name: name }));
         var analyzerState: AnalyzerState = {
-            idName: {id: analyzer.id, name: analyzer.name},
+            idName: { id: analyzer.id, name: analyzer.name },
             componentIdNames: componentIdNames,
             msgProcessedRows: [],
             logEventRows: [],
@@ -95,11 +95,12 @@ class _Page extends React.Component<{}, PageState> {
             this.setState(this.state);
         }
     };
+
     private logEventToRow = (msg: WebSocketMsgs.LogEvent): LogEventsTable.Row => {
         var componentIdNames = this.state.analyzers[msg.analyzerId].componentIdNames;
         return {
             logLevel: msg.logLevel,
-            formattedDate: FormatUtil.formatDate(new Date(msg.time)), //todo
+            formattedDate: FormatUtil.formatDate(new Date(msg.time)),
             componentName: FormatUtil.getComponentName(msg.componentId, componentIdNames),
             formattedMsgBody: msg.msgBody,
             original: msg
@@ -115,6 +116,7 @@ class _Page extends React.Component<{}, PageState> {
             this.setState(this.state);
         }
     };
+
     private msgProcessedToRow = (msg: WebSocketMsgs.ProcessedMsgEvent): ProcessedMsgsTable.Row => {
         var componentIdNames = this.state.analyzers[msg.analyzerId].componentIdNames;
         return {
@@ -126,24 +128,24 @@ class _Page extends React.Component<{}, PageState> {
         };
     };
 
-    render() {
+    private getSidebarProps = (): Sidebar.Props => {
         var analyzers: Sidebar.AnalyzerState[] = [];
-        for (var id in this.state.analyzers) {
-            var a = this.state.analyzers[id];
+        _.forOwn(this.state.analyzers, (analyzer, analyzerId) => {
             var uniqueSenderIdNames: IdName[] = [];
-            for (var id in a.uniqueSenderNameById)
-                uniqueSenderIdNames.push({id: id, name: a.uniqueSenderNameById[id]});
+            _.forOwn(analyzer.uniqueSenderNameById, (name, id) => uniqueSenderIdNames.push({ id: id, name: name }));
+
             var uniqueRecipientIdNames: IdName[] = [];
-            for (var id in a.uniqueRecipientNameById)
-                uniqueRecipientIdNames.push({id: id, name: a.uniqueRecipientNameById[id]});
+            _.forOwn(analyzer.uniqueRecipientNameById, (name, id) => uniqueRecipientIdNames.push({ id: id, name: name }));
+
             analyzers.push({
-                idName: a.idName,
-                componentIdNames: a.componentIdNames,
+                idName: analyzer.idName,
+                componentIdNames: analyzer.componentIdNames,
                 uniqueSenderIdNames: uniqueSenderIdNames,
                 uniqueRecipientIdNames: uniqueRecipientIdNames
             });
-        }
-        var sidebarProps: Sidebar.Props = {
+        });
+
+        return {
             activeAnalyzerId: this.state.activeAnalyzerId,
             analyzers: analyzers,
             onAnalyzerClicked: id => {
@@ -156,8 +158,10 @@ class _Page extends React.Component<{}, PageState> {
                 this.setState(this.state);
             }
         };
+    };
 
-        var mainContentProps: MainContent.Props = {
+    private getMainContentProps = (): MainContent.Props => {
+        return {
             msgProcessedRows: this.state.activeAnalyzerId ? this.state.analyzers[this.state.activeAnalyzerId].msgProcessedRows : [],
             logEventRows: this.state.activeAnalyzerId ? this.state.analyzers[this.state.activeAnalyzerId].logEventRows : [],
             filterState: this.state.filterState,
@@ -166,11 +170,15 @@ class _Page extends React.Component<{}, PageState> {
                 this.setState(this.state);
             }
         };
-        return R.div({id: 'wrapper'},
-            Sidebar.Component(sidebarProps),
-            MainContent.Component(mainContentProps));
-    }
+    };
 
+    render() {
+        return (
+            R.div({ id: 'wrapper' },
+                Sidebar.Component(this.getSidebarProps()),
+                MainContent.Component(this.getMainContentProps()))
+        );
+    }
 }
 var Page = React.createFactory(_Page);
 export = Page;

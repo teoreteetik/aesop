@@ -1,4 +1,4 @@
-/// <reference path="../types/react/react.d.ts" />
+/// <reference path="../types/common.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -21,8 +21,9 @@ define(["require", "exports", 'react'], function (require, exports, React) {
             var _this = this;
             _super.apply(this, arguments);
             this.getMsgDetailsColumn = function () {
+                var panelHeader = (R.div({}, Row({}, Col({ xs: 1 }, Button({ bsSize: 'xsmall', onClick: _this.props.onBackClicked }, 'Back')), Col({ xs: 11 }, Table({ condensed: true, bordered: true, className: 'msgDetailsHeader' }, R.tr({}, R.td({}, 'Time'), R.td({}, _this.props.row.formattedDate)), R.tr({}, R.td({}, 'Sender'), R.td({}, _this.props.row.senderName)), R.tr({}, R.td({}, 'Recipient'), R.td({}, _this.props.row.recipientName)))))));
                 var rowSpan = _this.props.row.original.stackTrace ? 6 : 12;
-                return Col({ xs: rowSpan, style: { height: _this.props.height } }, Panel({ header: R.div({}, Row({}, Col({ xs: 1 }, Button({ bsSize: 'xsmall', onClick: _this.props.onBackClicked }, 'Back')), Col({ xs: 11 }, Table({ condensed: true, bordered: true, className: 'msgDetailsHeader' }, R.tr({}, R.td({}, 'Time'), R.td({}, _this.props.row.formattedDate)), R.tr({}, R.td({}, 'Sender'), R.td({}, _this.props.row.senderName)), R.tr({}, R.td({}, 'Recipient'), R.td({}, _this.props.row.recipientName)))))), className: 'formatted overviewPanel' }, R.pre({}, _this.props.row.formattedMsgBody)));
+                return (Col({ xs: rowSpan, style: { height: _this.props.height } }, Panel({ header: panelHeader, className: 'formatted overviewPanel' }, R.pre({}, _this.props.row.formattedMsgBody))));
             };
             this.getStacktraceColumn = function () {
                 if (_this.props.row.original.stackTrace)
@@ -32,7 +33,7 @@ define(["require", "exports", 'react'], function (require, exports, React) {
             };
         }
         MsgDetailsPane.prototype.render = function () {
-            return Row({}, this.getMsgDetailsColumn(), this.getStacktraceColumn());
+            return (Row({}, this.getMsgDetailsColumn(), this.getStacktraceColumn()));
         };
         return MsgDetailsPane;
     })(React.Component);

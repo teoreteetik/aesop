@@ -1,16 +1,13 @@
-/// <reference path="../types/react/react.d.ts" />
-/// <reference path="../types/lodash/lodash.d.ts" />
-/// <reference path="../types/lib.d.ts" />
+/// <reference path="../types/common.d.ts" />
 
 import React = require('react');
 import WebSocketMsgs = require('./WebSocketMsgs');
 import MsgProcessedFilter = require('./sidebar/filter/MsgProcessedFilter');
-import _ = require('lodash');
+
 require('fixed-data-table.css');
 var FixedDataTable = require('fixed-data-table');
 var Table = React.createFactory(FixedDataTable.Table);
 var Column = React.createFactory(FixedDataTable.Column);
-
 
 export interface Props {
     rows: Row[];
@@ -34,7 +31,6 @@ var senderNameDK = 'senderName';
 var recipientNameDK = 'recipientName';
 var formattedMsgBodyDK = 'formattedMsgBody';
 
-
 interface State {
     columnWidths: {[dataKey: string]: number};
     isColumnResizing: boolean;
@@ -42,7 +38,7 @@ interface State {
     clicks: number;
 }
 
-class _ProcessedMsgsTable extends React.Component<Props, State> {
+class ProcessedMsgsTable extends React.Component<Props, State> {
     constructor(props) {
         super(props);
         this.state = {
@@ -58,36 +54,34 @@ class _ProcessedMsgsTable extends React.Component<Props, State> {
         };
     }
 
-    private _onColumnResizeEndCallback = (newColumnWidth:number, dataKey:string):void => {
+    private onColumnResizeEndCallback = (newColumnWidth: number, dataKey: string):void => {
         this.state.isColumnResizing = false;
         this.state.columnWidths[dataKey] = newColumnWidth;
         this.setState(this.state);
     };
 
-    private passesTextFilter = (row: Row): boolean => !this.props.filterState.searchText ||
+    private getFilteredRows = (): Row[] => {
+        var pairPassesFilter = (pair: MsgProcessedFilter.Pair, row: Row) => (!pair.senderId || pair.senderId === row.original.senderComponentId) &&
+                                                                            (!pair.recipientId || pair.recipientId === row.original.recipientComponentId);
+        var passesSenderRecipientFilter = (row: Row) => _.some(this.props.filterState.addedPairs, (pair: MsgProcessedFilter.Pair) => pairPassesFilter(pair, row)) ||
+                                                        hasCurrentPair && pairPassesFilter(this.props.filterState.currentPair, row);
+        var passesStartTimeFilter = (row: Row): boolean => !this.props.filterState.startTime ||
+                                                               row.original.processingStartTime >= this.props.filterState.startTime;
+        var passesEndTimeFilter = (row: Row) => !this.props.filterState.endTime ||
+                                                row.original.processingStartTime <= this.props.filterState.endTime;
+        var passesTextFilter = (row: Row): boolean => !this.props.filterState.searchText ||
                                                       row.original.msgBody.indexOf(this.props.filterState.searchText) !== -1;
-    private passesStartTimeFilter = (row: Row): boolean => !this.props.filterState.startTime ||
-                                                           row.original.processingStartTime >= this.props.filterState.startTime;
+        var hasCurrentPair = this.props.filterState.currentPair.senderId || this.props.filterState.currentPair.recipientId;
+
+        var isFilterPresent = this.props.filterState.addedPairs.length > 0 || hasCurrentPair;
+        return this.props.rows.filter(row => {
+            return (!isFilterPresent || passesSenderRecipientFilter(row)) && passesTextFilter(row) && passesStartTimeFilter(row) && passesEndTimeFilter(row);
+        });
+    };
 
     render() {
-        var passesEndTimeFilter = (row: Row) => {
-            return !this.props.filterState.endTime || row.original.processingStartTime <= this.props.filterState.endTime;
-        };
-        var hasCurrentPair = this.props.filterState.currentPair.senderId || this.props.filterState.currentPair.recipientId;
-        var pairPassesFilter = (pair: MsgProcessedFilter.Pair, row: Row) => (!pair.senderId || pair.senderId === row.original.senderComponentId) &&
-                                                         (!pair.recipientId || pair.recipientId === row.original.recipientComponentId);
-
-        var passesSenderRecipientFilter = (row: Row) => {
-            return _.some(this.props.filterState.addedPairs, (pair: MsgProcessedFilter.Pair) => pairPassesFilter(pair, row)) ||
-                        hasCurrentPair && pairPassesFilter(this.props.filterState.currentPair, row);
-        };
-        var isFilterPresent = this.props.filterState.addedPairs.length > 0 || hasCurrentPair;
-        var rows = this.props.rows.filter(row => {
-            return (!isFilterPresent || passesSenderRecipientFilter(row)) && this.passesTextFilter(row) && this.passesStartTimeFilter(row) && passesEndTimeFilter(row);
-        });
-        var rowGetter = (index:number):Row => {
-            return rows[index];
-        };
+        var rows = this.getFilteredRows();
+        var rowGetter = (index:number):Row => rows[index];
         var onRowClick = (event, index: number, data) => {
             this.state.clicks++;
             if (this.state.clicks === 1) {
@@ -117,7 +111,7 @@ class _ProcessedMsgsTable extends React.Component<Props, State> {
                 width: this.props.tableWidth,
                 height: this.props.tableHeight,
                 isColumnResizing: this.state.isColumnResizing,
-                onColumnResizeEndCallback: this._onColumnResizeEndCallback,
+                onColumnResizeEndCallback: this.onColumnResizeEndCallback,
                 headerHeight: 40,
                 scrollTop: this.props.scrollTop,
                 onScrollEnd: (left, top) => {
@@ -151,4 +145,4 @@ class _ProcessedMsgsTable extends React.Component<Props, State> {
             }))
     }
 }
-export var Component = React.createFactory(_ProcessedMsgsTable);
+export var Component = React.createFactory(ProcessedMsgsTable);

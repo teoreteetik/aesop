@@ -1,14 +1,11 @@
-/// <reference path="../types/react/react.d.ts" />
+/// <reference path="../types/common.d.ts" />
 
 import React = require('react');
-import WebSocketMsgs = require('./WebSocketMsgs');
 import ProcessedMsgsTable = require('./ProcessedMsgsTable');
 import LogEventsTable = require('./LogEventsTable');
-import FormatUtil = require('./util/FormatUtil');
 import FilterSidebar = require('./sidebar/filter/FilterSidebar');
 import LogEventFilter = require('./sidebar/filter/LogEventFilter');
 import MsgDetailsPane = require('./MsgDetailsPane');
-
 var R = React.DOM;
 
 export interface Props {
@@ -40,11 +37,11 @@ class MainContent extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        this._update();
-        this._attatchResizeHandler();
+        this.update();
+        this.attatchResizeHandler();
     }
 
-    _attatchResizeHandler() {
+    private attatchResizeHandler = () => {
         var win = window;
         if (win.addEventListener)
             win.addEventListener('resize', this._onResize, false);
@@ -52,25 +49,29 @@ class MainContent extends React.Component<Props, State> {
             win.attachEvent('onresize', this._onResize);
         else
             win.onresize = this._onResize;
-    }
+    };
 
-    private _update = ():void => {
+    private update = () => {
         var win = window;
-        var widthOffset = 400;
+        var widthOffset = 300;
         this.state.tableWidth = win.innerWidth - widthOffset;
         this.state.msgProcessedTableHeight = Math.round(win.innerHeight * 0.6) - 20;
         this.state.logEventsTableHeight = Math.round(win.innerHeight * 0.4) - 20;
         this.setState(this.state);
     };
 
-    private _updateTimerId:number;
+    private updateTimerId: number;
     private _onResize = () => {
-        clearTimeout(this._updateTimerId);
-        this._updateTimerId = setTimeout(this._update, 16);
+        clearTimeout(this.updateTimerId);
+        this.updateTimerId = setTimeout(this.update, 16);
     };
-    private getUpperComponent = () => {
-        if (this.state.msgDetails) {
-            return MsgDetailsPane.Component({
+
+    private getUpperComponent = () => this.state.msgDetails ? this.getMsgDetailsPane()
+                                                            : this.getProcessedMsgsTable();
+
+    private getMsgDetailsPane = () => {
+        return (
+            MsgDetailsPane.Component({
                 row: this.state.msgDetails,
                 height: this.state.msgProcessedTableHeight,
                 onBackClicked: () => {
@@ -82,9 +83,13 @@ class MainContent extends React.Component<Props, State> {
                     this.state.msgDetails = undefined;
                     this.setState(this.state);
                 }
-            });
-        } else {
-            return ProcessedMsgsTable.Component({
+            })
+        );
+    };
+
+    private getProcessedMsgsTable = () => {
+        return (
+            ProcessedMsgsTable.Component({
                 rows: this.props.msgProcessedRows,
                 tableWidth: this.state.tableWidth,
                 tableHeight: this.state.msgProcessedTableHeight,
@@ -103,9 +108,10 @@ class MainContent extends React.Component<Props, State> {
                         componentId: row.original.recipientComponentId
                     });
                 }
-            });
-        }
+            })
+        );
     };
+
     private getLogEventsTable = () => {
         return LogEventsTable.Component({
             rows: this.props.logEventRows,
@@ -116,9 +122,10 @@ class MainContent extends React.Component<Props, State> {
     };
 
     render() {
-        return R.div({id: 'main'},
-            this.getUpperComponent(),
-            this.getLogEventsTable()
+        return (
+            R.div({ id: 'main' },
+                this.getUpperComponent(),
+                this.getLogEventsTable())
         );
     }
 }

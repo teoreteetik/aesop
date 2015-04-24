@@ -1,5 +1,4 @@
-/// <reference path="../../../types/react/react.d.ts" />
-/// <reference path="../../../types/lodash/lodash.d.ts" />
+/// <reference path="../../../types/common.d.ts" />
 
 import React = require('react');
 import MsgProcessedFilter = require('./MsgProcessedFilter');
@@ -20,7 +19,6 @@ export interface Props {
 }
 
 class FilterSidebar extends React.Component<Props, {}> {
-
     private getMsgProcessedFilterProps = (): MsgProcessedFilter.Props => {
         return {
             filterState: this.props.filterState.msgProcessedFilterState,
@@ -47,9 +45,11 @@ class FilterSidebar extends React.Component<Props, {}> {
     };
 
     render() {
-        return R.div({},
-            MsgProcessedFilter.Component(this.getMsgProcessedFilterProps()),
-            LogEventFilter.Component(this.getLogEventFilterProps()));
+        return (
+            R.div({},
+                MsgProcessedFilter.Component(this.getMsgProcessedFilterProps()),
+                LogEventFilter.Component(this.getLogEventFilterProps()))
+        );
     }
 }
 export var Component = React.createFactory(FilterSidebar);

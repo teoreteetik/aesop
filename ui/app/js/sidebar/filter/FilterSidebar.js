@@ -1,5 +1,4 @@
-/// <reference path="../../../types/react/react.d.ts" />
-/// <reference path="../../../types/lodash/lodash.d.ts" />
+/// <reference path="../../../types/common.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -39,7 +38,7 @@ define(["require", "exports", 'react', './MsgProcessedFilter', './LogEventFilter
             };
         }
         FilterSidebar.prototype.render = function () {
-            return R.div({}, MsgProcessedFilter.Component(this.getMsgProcessedFilterProps()), LogEventFilter.Component(this.getLogEventFilterProps()));
+            return (R.div({}, MsgProcessedFilter.Component(this.getMsgProcessedFilterProps()), LogEventFilter.Component(this.getLogEventFilterProps())));
         };
         return FilterSidebar;
     })(React.Component);
