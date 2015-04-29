@@ -12,9 +12,7 @@ import ee.lis.core.observer.ObserverProtocol.MsgProcessed;
 
 public class Master extends AbstractActor {
 
-    private Master() {
-        Config config = ConfigFactory.load();
-
+    private Master(Config config) {
         Config driverManagerConfig = config.getConfig("DriverManager");
         context().actorOf(DriverManager.props(driverManagerConfig), "DriverManager");
 
@@ -30,4 +28,9 @@ public class Master extends AbstractActor {
                 .build()
         );
     }
+
+    private Master() {
+        this(ConfigFactory.load());
+    }
+
 }

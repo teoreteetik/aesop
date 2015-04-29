@@ -26,12 +26,11 @@ public class MockSocketAnalyzer {
 
     public MockSocketAnalyzer(ActorSystem system, String address, int port, Mode mode) {
         socketProbe = new JavaTestKit(system);
-
         if (mode == Mode.CLIENT) {
-            socketActor = system.actorOf(Props.create(SocketClient.class), "mockAnalyzer");
-            socketActor.tell(new SocketClientConf(address, port, socketProbe.getRef(), FiniteDuration.apply(5000, TimeUnit.MILLISECONDS)), ActorRef.noSender());
+            socketActor = system.actorOf(Props.create(SocketClient.class));
+            socketActor.tell(new SocketClientConf(address, port, socketProbe.getRef(), FiniteDuration.apply(500, TimeUnit.MILLISECONDS)), ActorRef.noSender());
         } else {
-            socketActor = system.actorOf(Props.create(SocketServer.class), "mockAnalyzer");
+            socketActor = system.actorOf(Props.create(SocketServer.class));
             socketActor.tell(new SocketServerConf(address,port, socketProbe.getRef()), ActorRef.noSender());
         }
     }

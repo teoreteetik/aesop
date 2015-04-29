@@ -9,7 +9,10 @@ import ee.lis.interfaces.MyLabMessages.MyLabOrderMsg;
 import ee.lis.interfaces.MyLabMessages.MyLabQueryMsg;
 import ee.lis.interfaces.MyLabMessages.MyLabResultMsg;
 import ee.lis.util.JsonUtil;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
+import scala.concurrent.duration.FiniteDuration;
 
 public class MockLIS {
     private final ActorRef mockLIS;
@@ -44,5 +47,9 @@ public class MockLIS {
     public MockLIS send(String str) {
         httpProbe.getLastSender().tell(str, httpProbe.getRef());
         return this;
+    }
+
+    public String expectAnyString() {
+        return httpProbe.expectMsgClass(FiniteDuration.apply(10, TimeUnit.SECONDS), String.class);
     }
 }
