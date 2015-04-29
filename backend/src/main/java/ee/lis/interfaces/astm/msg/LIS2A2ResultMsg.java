@@ -1,14 +1,14 @@
 package ee.lis.interfaces.astm.msg;
 
-import ee.lis.interfaces.astm.record.AstmRecord;
+import ee.lis.interfaces.astm.record.LIS2A2Record;
 import ee.lis.interfaces.astm.record.O;
 import ee.lis.interfaces.astm.record.P;
 import ee.lis.interfaces.astm.record.R;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AstmResultMsg extends AstmMsg {
-    public AstmResultMsg(List<AstmRecord> records) {
+public class LIS2A2ResultMsg extends LIS2A2Msg {
+    public LIS2A2ResultMsg(List<LIS2A2Record> records) {
         super(records);
     }
 
@@ -29,7 +29,7 @@ public class AstmResultMsg extends AstmMsg {
 
     @Override
     public String toString() {
-        return "AstmResultMsg{" +
+        return "LIS2A2ResultMsg{" +
             "records=" + records +
             '}';
     }

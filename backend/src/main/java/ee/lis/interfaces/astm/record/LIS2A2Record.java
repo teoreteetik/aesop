@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public abstract class AstmRecord {
+public abstract class LIS2A2Record {
 
-    public static AstmRecord fromString(String record) {
+    public static LIS2A2Record fromString(String record) {
         String crRemoved = record.substring(0, record.lastIndexOf(CR));
         String[] parts = crRemoved.split(Pattern.quote("|"));
 
@@ -41,13 +41,13 @@ public abstract class AstmRecord {
 
     protected final DelimitedData<Field> data;
 
-    protected abstract AstmRecord getNew(DelimitedData<Field> data);
+    protected abstract LIS2A2Record getNew(DelimitedData<Field> data);
 
-    protected AstmRecord(DelimitedData<Field> data) {
+    protected LIS2A2Record(DelimitedData<Field> data) {
         this.data = data;
     }
 
-    public AstmRecord() {
+    public LIS2A2Record() {
         this(new DelimitedData<>("|"));
     }
 
@@ -55,34 +55,34 @@ public abstract class AstmRecord {
         return data.asString() + CR;
     }
 
-    protected AstmRecord setField(int fieldIndex, Field field) {
+    protected LIS2A2Record setField(int fieldIndex, Field field) {
         return getNew(data.setField(fieldIndex - 1, field));
     }
 
-    protected AstmRecord setField(int fieldIndex, String value) {
+    protected LIS2A2Record setField(int fieldIndex, String value) {
         Field newField = new PrimitiveField(value);
         return setField(fieldIndex, newField);
     }
 
-    protected AstmRecord setComponent(int fieldIndex, int componentIndex, Field value) {
+    protected LIS2A2Record setComponent(int fieldIndex, int componentIndex, Field value) {
         Field oldField = data.get(fieldIndex - 1);
         CompomentField newField = oldField == null ? new CompomentField().setComponent(componentIndex, value)
             : ((CompomentField) oldField).setComponent(componentIndex, value);
         return getNew(data.setField(fieldIndex - 1, newField));
     }
 
-    protected AstmRecord setComponent(int fieldIndex, int componentIndex, String value) {
+    protected LIS2A2Record setComponent(int fieldIndex, int componentIndex, String value) {
         return setComponent(fieldIndex, componentIndex, new PrimitiveField(value));
     }
 
-    protected AstmRecord addRepeat(int fieldIndex, Field value) {
+    protected LIS2A2Record addRepeat(int fieldIndex, Field value) {
         Field oldField = data.get(fieldIndex - 1);
         RepeatField newField = oldField == null ? new RepeatField().addRepeat(value)
             : ((RepeatField) oldField).addRepeat(value);
         return getNew(data.setField(fieldIndex - 1, newField));
     }
 
-    protected AstmRecord addRepeat(int fieldIndex, String value) {
+    protected LIS2A2Record addRepeat(int fieldIndex, String value) {
         return addRepeat(fieldIndex, new PrimitiveField(value));
     }
 

@@ -4,7 +4,7 @@ import ee.lis.interfaces.astm.DelimitedData;
 import ee.lis.interfaces.astm.record.field.CompomentField;
 import ee.lis.interfaces.astm.record.field.Field;
 
-public class O extends AstmRecord {
+public class O extends LIS2A2Record {
 
     public static O create(int sequenceNumber) {
         return (O) new O().setField(1, Type.O.name()).setField(2, String.valueOf(sequenceNumber));

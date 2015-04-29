@@ -1,13 +1,13 @@
 package ee.lis.interfaces.astm.msg;
 
-import ee.lis.interfaces.astm.record.AstmRecord;
+import ee.lis.interfaces.astm.record.LIS2A2Record;
 import ee.lis.interfaces.astm.record.Q;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AstmQueryMsg extends AstmMsg {
+public class LIS2A2QueryMsg extends LIS2A2Msg {
 
-    public AstmQueryMsg(List<AstmRecord> records) {
+    public LIS2A2QueryMsg(List<LIS2A2Record> records) {
         super(records);
     }
 
@@ -20,7 +20,7 @@ public class AstmQueryMsg extends AstmMsg {
 
     @Override
     public String toString() {
-        return "AstmQueryMsg{" +
+        return "LIS2A2QueryMsg{" +
             "records=" + records +
             '}';
     }

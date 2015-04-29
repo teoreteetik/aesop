@@ -3,7 +3,7 @@ package ee.lis.interfaces.astm.record;
 import ee.lis.interfaces.astm.DelimitedData;
 import ee.lis.interfaces.astm.record.field.Field;
 
-public class R extends AstmRecord {
+public class R extends LIS2A2Record {
 
     public static R create(int sequenceNumber) {
         return (R) new R().setField(1, Type.R.name()).setField(2, String.valueOf(sequenceNumber));
@@ -33,7 +33,7 @@ public class R extends AstmRecord {
     }
 
     @Override
-    protected AstmRecord getNew(DelimitedData<Field> data) {
+    protected LIS2A2Record getNew(DelimitedData<Field> data) {
         return new R(data);
     }
 

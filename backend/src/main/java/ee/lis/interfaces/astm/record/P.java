@@ -3,7 +3,7 @@ package ee.lis.interfaces.astm.record;
 import ee.lis.interfaces.astm.DelimitedData;
 import ee.lis.interfaces.astm.record.field.Field;
 
-public class P extends AstmRecord {
+public class P extends LIS2A2Record {
 
     public static P create(int sequenceNumber) {
         return (P) new P().setField(1, Type.P.name()).setField(2, String.valueOf(sequenceNumber));

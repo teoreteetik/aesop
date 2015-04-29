@@ -1,22 +1,22 @@
 package ee.lis.flow_component.astm_to_string;
 
 import akka.japi.pf.ReceiveBuilder;
-import ee.lis.interfaces.astm.msg.AstmMsg;
+import ee.lis.interfaces.astm.msg.LIS2A2Msg;
 import ee.lis.util.CommonProtocol.RecipientConf;
 import ee.lis.core.FlowComponent;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
-public class AstmToStringConverter extends FlowComponent<RecipientConf> {
+public class LIS2A2ToStringConverter extends FlowComponent<RecipientConf> {
 
     @Override
     public PartialFunction<Object, BoxedUnit> getBehaviour() {
         return ReceiveBuilder
-            .match(AstmMsg.class, this::convertAndForward)
+            .match(LIS2A2Msg.class, this::convertAndForward)
             .build();
     }
 
-    private void convertAndForward(AstmMsg message) {
+    private void convertAndForward(LIS2A2Msg message) {
         conf.recipient.tell(message.asString(), self());
     }
 }

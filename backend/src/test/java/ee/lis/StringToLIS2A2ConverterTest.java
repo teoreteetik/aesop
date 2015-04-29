@@ -5,8 +5,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
-import ee.lis.flow_component.astm_to_string.StringToAstmConverter;
-import ee.lis.interfaces.astm.msg.AstmResultMsg;
+import ee.lis.flow_component.astm_to_string.StringToLIS2A2Converter;
+import ee.lis.interfaces.astm.msg.LIS2A2ResultMsg;
 import ee.lis.interfaces.astm.record.O;
 import ee.lis.interfaces.astm.record.P;
 import ee.lis.interfaces.astm.record.R;
@@ -17,7 +17,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class StringToAstmConverterTest {
+public class StringToLIS2A2ConverterTest {
 
     static ActorSystem system;
 
@@ -35,7 +35,7 @@ public class StringToAstmConverterTest {
     @Test
     public void resultStringToAstmResultMessageTest() {
         new JavaTestKit(system) {{
-            final ActorRef stringToAstmConverter = system.actorOf(Props.create(StringToAstmConverter.class));
+            final ActorRef stringToAstmConverter = system.actorOf(Props.create(StringToLIS2A2Converter.class));
 
             String resultMessage = convertLowLevelChars(
                 "H|\\^&||Password1|Micro1|2937 Southwestern Avenue^Buffalo^NY^73205||319412-9722|LS|1||P|1394-94|19890501074500<CR>" +
@@ -48,7 +48,7 @@ public class StringToAstmConverterTest {
             final JavaTestKit recipient = new JavaTestKit(system);
             stringToAstmConverter.tell(new RecipientConf(recipient.getRef()), getRef());
             stringToAstmConverter.tell(resultMessage, getRef());
-            AstmResultMsg received = recipient.expectMsgClass(AstmResultMsg.class);
+            LIS2A2ResultMsg received = recipient.expectMsgClass(LIS2A2ResultMsg.class);
             List<P> patientRecords = received.getPatientRecords();
             Assert.assertEquals(1, patientRecords.size());
 

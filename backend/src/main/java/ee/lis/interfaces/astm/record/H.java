@@ -5,7 +5,7 @@ import ee.lis.interfaces.astm.record.field.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class H extends AstmRecord {
+public class H extends LIS2A2Record {
 
     public static H create() {
         return (H) new H().setField(1, Type.H.name())

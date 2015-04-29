@@ -5,8 +5,8 @@ import static java.util.stream.Collectors.toList;
 import akka.japi.pf.ReceiveBuilder;
 import ee.lis.core.FlowComponent;
 import ee.lis.interfaces.MyLabMessages.*;
-import ee.lis.interfaces.astm.msg.AstmQueryMsg;
-import ee.lis.interfaces.astm.msg.AstmResultMsg;
+import ee.lis.interfaces.astm.msg.LIS2A2QueryMsg;
+import ee.lis.interfaces.astm.msg.LIS2A2ResultMsg;
 import ee.lis.interfaces.astm.record.O;
 import ee.lis.interfaces.astm.record.P;
 import ee.lis.util.CommonProtocol.RecipientConf;
@@ -15,25 +15,25 @@ import java.util.List;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
-public class AstmToMyLabConverter extends FlowComponent<RecipientConf> {
+public class LIS2A2ToMyLabConverter extends FlowComponent<RecipientConf> {
     @Override
     protected PartialFunction<Object, BoxedUnit> getBehaviour() {
         return ReceiveBuilder
-            .match(AstmResultMsg.class, this::convertAndForwardResult)
-            .match(AstmQueryMsg.class, this::convertAndForwardQuery)
+            .match(LIS2A2ResultMsg.class, this::convertAndForwardResult)
+            .match(LIS2A2QueryMsg.class, this::convertAndForwardQuery)
             .build();
     }
 
-    private void convertAndForwardResult(AstmResultMsg astmResultMsg) {
-        for (MyLabResultMsg myLabResultMsg : astmResultMsgToMyLabResultMsgs(astmResultMsg))
+    private void convertAndForwardResult(LIS2A2ResultMsg LIS2A2ResultMsg) {
+        for (MyLabResultMsg myLabResultMsg : astmResultMsgToMyLabResultMsgs(LIS2A2ResultMsg))
             conf.recipient.tell(myLabResultMsg, self());
     }
 
-    public List<MyLabResultMsg> astmResultMsgToMyLabResultMsgs(AstmResultMsg astmResultMsg) {
+    public List<MyLabResultMsg> astmResultMsgToMyLabResultMsgs(LIS2A2ResultMsg LIS2A2ResultMsg) {
         List<MyLabResultMsg> result = new ArrayList<>();
-        for (P patientRecord : astmResultMsg.getPatientRecords()) {
-            for (O orderRecord : astmResultMsg.getOrderRecords(patientRecord)) {
-                List<Analysis> analyses = astmResultMsg.getResultRecords(orderRecord).stream().map(
+        for (P patientRecord : LIS2A2ResultMsg.getPatientRecords()) {
+            for (O orderRecord : LIS2A2ResultMsg.getOrderRecords(patientRecord)) {
+                List<Analysis> analyses = LIS2A2ResultMsg.getResultRecords(orderRecord).stream().map(
                             resultRecord -> new Analysis(resultRecord.getAnalysisCode(),
                                                          resultRecord.getAnalysisName(),
                                                          new Result(resultRecord.getResultValue(),
@@ -50,13 +50,13 @@ public class AstmToMyLabConverter extends FlowComponent<RecipientConf> {
         return result;
     }
 
-    private void convertAndForwardQuery(AstmQueryMsg astmQueryMsg) {
-        for (MyLabQueryMsg myLabQueryMsg : astmQueryMsgToMyLabQueryMsgs(astmQueryMsg))
+    private void convertAndForwardQuery(LIS2A2QueryMsg LIS2A2QueryMsg) {
+        for (MyLabQueryMsg myLabQueryMsg : astmQueryMsgToMyLabQueryMsgs(LIS2A2QueryMsg))
             conf.recipient.tell(myLabQueryMsg, self());
     }
 
-    public List<MyLabQueryMsg> astmQueryMsgToMyLabQueryMsgs(AstmQueryMsg astmQueryMsg) {
-        return astmQueryMsg.getQueryRecords().stream()
+    public List<MyLabQueryMsg> astmQueryMsgToMyLabQueryMsgs(LIS2A2QueryMsg LIS2A2QueryMsg) {
+        return LIS2A2QueryMsg.getQueryRecords().stream()
             .map(queryRecord -> new MyLabQueryMsg(queryRecord.getSpecimenIds(), queryRecord.getAnalysisCodes()))
             .collect(toList());
     }

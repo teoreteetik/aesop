@@ -5,7 +5,7 @@ import ee.lis.core.FlowComponent;
 import ee.lis.interfaces.MyLabMessages.Analysis;
 import ee.lis.interfaces.MyLabMessages.Container;
 import ee.lis.interfaces.MyLabMessages.MyLabOrderMsg;
-import ee.lis.interfaces.astm.msg.AstmOrderMsg;
+import ee.lis.interfaces.astm.msg.LIS2A2OrderMsg;
 import ee.lis.interfaces.astm.record.H;
 import ee.lis.interfaces.astm.record.L;
 import ee.lis.interfaces.astm.record.O;
@@ -15,7 +15,7 @@ import java.util.Date;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
-public class MyLabToAstmConverter extends FlowComponent<RecipientConf> {
+public class MyLabToLIS2A2Converter extends FlowComponent<RecipientConf> {
     @Override
     protected PartialFunction<Object, BoxedUnit> getBehaviour() {
         return ReceiveBuilder
@@ -24,12 +24,12 @@ public class MyLabToAstmConverter extends FlowComponent<RecipientConf> {
     }
 
     private void convertAndForwardOrderMsg(MyLabOrderMsg myLabOrderMsg) {
-        AstmOrderMsg astmOrderMsg = myLabOrderMsgToAstmOrderMsg(myLabOrderMsg);
+        LIS2A2OrderMsg astmOrderMsg = myLabOrderMsgToAstmOrderMsg(myLabOrderMsg);
         conf.recipient.tell(astmOrderMsg, self());
     }
 
-    public AstmOrderMsg myLabOrderMsgToAstmOrderMsg(MyLabOrderMsg myLabOrderMsg) {
-        AstmOrderMsg result = new AstmOrderMsg();
+    public LIS2A2OrderMsg myLabOrderMsgToAstmOrderMsg(MyLabOrderMsg myLabOrderMsg) {
+        LIS2A2OrderMsg result = new LIS2A2OrderMsg();
         result = result
             .addRecord(H.create()
                 .setMessageControlId("12345")

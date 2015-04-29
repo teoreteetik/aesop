@@ -5,7 +5,7 @@ import ee.lis.interfaces.astm.DelimitedData;
 import ee.lis.interfaces.astm.record.field.Field;
 import java.util.List;
 
-public class Q extends AstmRecord {
+public class Q extends LIS2A2Record {
 
     public static Q create(int sequenceNumber) {
         return (Q) new Q().setField(1, Type.Q.name()).setField(2, String.valueOf(sequenceNumber));
@@ -29,7 +29,7 @@ public class Q extends AstmRecord {
     }
 
     @Override
-    protected AstmRecord getNew(DelimitedData<Field> data) {
+    protected LIS2A2Record getNew(DelimitedData<Field> data) {
         return new Q(data);
     }
 

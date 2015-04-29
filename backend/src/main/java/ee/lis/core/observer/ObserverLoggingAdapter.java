@@ -23,7 +23,6 @@ public class ObserverLoggingAdapter extends AbstractActor {
             ReceiveBuilder
                 .match(InitializeLogger.class, __ -> sender().tell(Logging.loggerInitialized(), self()))
                 .match(Logging.LogEvent.class, event -> {
-                    System.out.println(event.logSource());
                     context().system().eventStream().publish(
                         new LogEvent(
                             logLevels.get(event.level()),
