@@ -1,18 +1,16 @@
 package ee.lis.flow_component.astme138195;
 
+import static ee.lis.flow_component.astme138195.AstmE138195Protocol.*;
+import static ee.lis.util.LowLevelUtils.*;
 import akka.japi.pf.ReceiveBuilder;
-import ee.lis.flow_component.socket.SocketProtocol.BytesMessage;
 import ee.lis.core.FlowComponent;
-import scala.PartialFunction;
-import scala.runtime.BoxedUnit;
-
+import ee.lis.flow_component.socket.SocketProtocol.BytesMessage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
-
-import static ee.lis.flow_component.astme138195.AstmE138195Protocol.*;
-import static ee.lis.util.LowLevelUtils.*;
+import scala.PartialFunction;
+import scala.runtime.BoxedUnit;
 
 public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
 
@@ -21,6 +19,7 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
     private PartialFunction<Object, BoxedUnit> sendingState;
 
     private final List<String> msgBeingSent = new ArrayList<>();
+    private int sendingFrameNumber;
     private final StringBuilder msgBeingReceived = new StringBuilder();
 
     @Override
@@ -44,6 +43,7 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
     }
 
     private void goToSendingState(String msgToSend) {
+        sendingFrameNumber = 0;
         msgBeingSent.clear();
         Collections.addAll(msgBeingSent, msgToSend.split("(?<=" + CR + ")"));
         conf.lowLevelRecipient.tell(ENQBytes, self());
@@ -94,7 +94,7 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
         int index = frameBytes.indexOf((byte) ETX);
         if (index == -1)
             index = frameBytes.indexOf((byte) ETB);
-        List<Byte> payloadBytes = frameBytes.subList(1, index);
+        List<Byte> payloadBytes = frameBytes.subList(2, index);
         byte[] bytes = new byte[payloadBytes.size()];
         IntStream.range(0, payloadBytes.size()).forEach(i -> bytes[i] = payloadBytes.get(i));
         return new String(bytes);
@@ -110,10 +110,11 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
         } else {
             conf.lowLevelRecipient.tell(getFrame(nextFrame, ETX), self());
         }
+        sendingFrameNumber = (sendingFrameNumber + 1) % 8;
     }
 
     private BytesMessage getFrame(String payload, char payloadDelimiter) {
-        String frameForChecksum = STX + payload + payloadDelimiter;
+        String frameForChecksum = "" + STX + sendingFrameNumber + payload + payloadDelimiter;
         String msg = frameForChecksum + getCheckSum(frameForChecksum) + CR + LF;
         return new BytesMessage(msg);
     }
