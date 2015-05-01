@@ -25,6 +25,7 @@ export interface Row {
     recipientName: string;
     formattedMsgBody: string;
     original: WebSocketMsgs.ProcessedMsgEvent;
+    isRead: boolean;
 }
 var formattedDateDK = 'formattedDate';
 var senderNameDK = 'senderName';
@@ -61,21 +62,25 @@ class ProcessedMsgsTable extends React.Component<Props, State> {
     };
 
     private getFilteredRows = (): Row[] => {
+        var fs: MsgProcessedFilter.FilterState = this.props.filterState;
         var pairPassesFilter = (pair: MsgProcessedFilter.Pair, row: Row) => (!pair.senderId || pair.senderId === row.original.senderComponentId) &&
                                                                             (!pair.recipientId || pair.recipientId === row.original.recipientComponentId);
-        var passesSenderRecipientFilter = (row: Row) => _.some(this.props.filterState.addedPairs, (pair: MsgProcessedFilter.Pair) => pairPassesFilter(pair, row)) ||
-                                                        hasCurrentPair && pairPassesFilter(this.props.filterState.currentPair, row);
-        var passesStartTimeFilter = (row: Row): boolean => !this.props.filterState.startTime ||
-                                                               row.original.processingStartTime >= this.props.filterState.startTime;
-        var passesEndTimeFilter = (row: Row) => !this.props.filterState.endTime ||
-                                                row.original.processingStartTime <= this.props.filterState.endTime;
-        var passesTextFilter = (row: Row): boolean => !this.props.filterState.searchText ||
-                                                      row.original.msgBody.indexOf(this.props.filterState.searchText) !== -1;
+        var passesSenderRecipientFilter = (row: Row) => _.some(fs.addedPairs, (pair: MsgProcessedFilter.Pair) => pairPassesFilter(pair, row)) ||
+                                                        hasCurrentPair && pairPassesFilter(fs.currentPair, row);
+        var passesStartTimeFilter = (row: Row): boolean => !fs.startTime ||
+                                                               row.original.processingStartTime >= fs.startTime;
+        var passesEndTimeFilter = (row: Row) => !fs.endTime ||
+                                                row.original.processingStartTime <= fs.endTime;
+        var passesTextFilter = (row: Row): boolean => !fs.searchText ||
+                                                      row.original.msgBody.indexOf(fs.searchText) !== -1;
+        var passesProcessingStateFilter = (row: Row): boolean => fs.processingState === undefined ||
+                                                        fs.processingState === MsgProcessedFilter.ProcessingState.SUCCESS && row.original.stackTrace === undefined ||
+                                                        fs.processingState === MsgProcessedFilter.ProcessingState.FAIL && row.original.stackTrace !== undefined;
         var hasCurrentPair = this.props.filterState.currentPair.senderId || this.props.filterState.currentPair.recipientId;
 
         var isFilterPresent = this.props.filterState.addedPairs.length > 0 || hasCurrentPair;
         return this.props.rows.filter(row => {
-            return (!isFilterPresent || passesSenderRecipientFilter(row)) && passesTextFilter(row) && passesStartTimeFilter(row) && passesEndTimeFilter(row);
+            return (!isFilterPresent || passesSenderRecipientFilter(row)) && passesTextFilter(row) && passesStartTimeFilter(row) && passesEndTimeFilter(row) && passesProcessingStateFilter(row);
         });
     };
 
@@ -100,7 +105,8 @@ class ProcessedMsgsTable extends React.Component<Props, State> {
             if (index === this.state.selectedRowIndex)
                 classNames.push('selectedRow');
             if (rows[index].original.stackTrace)
-                classNames.push('error');
+                classNames.push(rows[index].isRead ? 'readError'
+                                                   : 'unreadError');
             return classNames.join(" ");
         };
         return Table({

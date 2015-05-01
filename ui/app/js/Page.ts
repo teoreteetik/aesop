@@ -41,7 +41,9 @@ class _Page extends React.Component<{}, PageState> {
                     addedPairs: [],
                     startTime: undefined,
                     endTime: undefined,
-                    searchText: undefined
+                    searchText: undefined,
+                    processingState: undefined,
+                    numOfNewFailedMsgs: 0
                 },
                 logEventFilterState: {
                     startTime: undefined,
@@ -90,7 +92,6 @@ class _Page extends React.Component<{}, PageState> {
     private handleLogEvent = (msg: WebSocketMsgs.LogEvent): void => {
         var analyzerState = this.state.analyzers[msg.analyzerId];
         if (analyzerState) {
-            //uniquecomponentid-sse ka midagi?
             analyzerState.logEventRows.push(this.logEventToRow(msg));
             this.setState(this.state);
         }
@@ -113,6 +114,8 @@ class _Page extends React.Component<{}, PageState> {
             analyzerState.uniqueRecipientNameById[msg.recipientComponentId] = FormatUtil.getComponentName(msg.recipientComponentId, analyzerState.componentIdNames);
             analyzerState.uniqueSenderNameById[msg.senderComponentId] = FormatUtil.getComponentName(msg.senderComponentId, analyzerState.componentIdNames);
             analyzerState.msgProcessedRows.push(this.msgProcessedToRow(msg));
+            if (msg.stackTrace)
+                this.state.filterState.msgProcessedFilterState.numOfNewFailedMsgs++;
             this.setState(this.state);
         }
     };
@@ -124,7 +127,8 @@ class _Page extends React.Component<{}, PageState> {
             senderName: FormatUtil.getComponentName(msg.senderComponentId, componentIdNames),
             recipientName: FormatUtil.getComponentName(msg.recipientComponentId, componentIdNames),
             formattedMsgBody: msg.msgBody,
-            original: msg
+            original: msg,
+            isRead: false
         };
     };
 
@@ -168,6 +172,15 @@ class _Page extends React.Component<{}, PageState> {
             onLogFilterStateChanged: (newState) => {
                 this.state.filterState.logEventFilterState = newState;
                 this.setState(this.state);
+            },
+            markRowAsRead: (row: ProcessedMsgsTable.Row) => {
+                if (!row.isRead) {
+                    row.isRead = true;
+                    if (row.original.stackTrace){
+                        this.state.filterState.msgProcessedFilterState.numOfNewFailedMsgs--;
+                    }
+                    this.setState(this.state);
+                }
             }
         };
     };

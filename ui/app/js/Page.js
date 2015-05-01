@@ -44,7 +44,6 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
             this.handleLogEvent = function (msg) {
                 var analyzerState = _this.state.analyzers[msg.analyzerId];
                 if (analyzerState) {
-                    //uniquecomponentid-sse ka midagi?
                     analyzerState.logEventRows.push(_this.logEventToRow(msg));
                     _this.setState(_this.state);
                 }
@@ -65,6 +64,8 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                     analyzerState.uniqueRecipientNameById[msg.recipientComponentId] = FormatUtil.getComponentName(msg.recipientComponentId, analyzerState.componentIdNames);
                     analyzerState.uniqueSenderNameById[msg.senderComponentId] = FormatUtil.getComponentName(msg.senderComponentId, analyzerState.componentIdNames);
                     analyzerState.msgProcessedRows.push(_this.msgProcessedToRow(msg));
+                    if (msg.stackTrace)
+                        _this.state.filterState.msgProcessedFilterState.numOfNewFailedMsgs++;
                     _this.setState(_this.state);
                 }
             };
@@ -75,7 +76,8 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                     senderName: FormatUtil.getComponentName(msg.senderComponentId, componentIdNames),
                     recipientName: FormatUtil.getComponentName(msg.recipientComponentId, componentIdNames),
                     formattedMsgBody: msg.msgBody,
-                    original: msg
+                    original: msg,
+                    isRead: false
                 };
             };
             this.getSidebarProps = function () {
@@ -114,6 +116,15 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                     onLogFilterStateChanged: function (newState) {
                         _this.state.filterState.logEventFilterState = newState;
                         _this.setState(_this.state);
+                    },
+                    markRowAsRead: function (row) {
+                        if (!row.isRead) {
+                            row.isRead = true;
+                            if (row.original.stackTrace) {
+                                _this.state.filterState.msgProcessedFilterState.numOfNewFailedMsgs--;
+                            }
+                            _this.setState(_this.state);
+                        }
                     }
                 };
             };
@@ -129,7 +140,9 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                         addedPairs: [],
                         startTime: undefined,
                         endTime: undefined,
-                        searchText: undefined
+                        searchText: undefined,
+                        processingState: undefined,
+                        numOfNewFailedMsgs: 0
                     },
                     logEventFilterState: {
                         startTime: undefined,

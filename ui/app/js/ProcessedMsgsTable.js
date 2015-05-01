@@ -5,7 +5,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", 'react'], function (require, exports, React) {
+define(["require", "exports", 'react', './sidebar/filter/MsgProcessedFilter'], function (require, exports, React, MsgProcessedFilter) {
     require('fixed-data-table.css');
     var FixedDataTable = require('fixed-data-table');
     var Table = React.createFactory(FixedDataTable.Table);
@@ -25,15 +25,17 @@ define(["require", "exports", 'react'], function (require, exports, React) {
                 _this.setState(_this.state);
             };
             this.getFilteredRows = function () {
+                var fs = _this.props.filterState;
                 var pairPassesFilter = function (pair, row) { return (!pair.senderId || pair.senderId === row.original.senderComponentId) && (!pair.recipientId || pair.recipientId === row.original.recipientComponentId); };
-                var passesSenderRecipientFilter = function (row) { return _.some(_this.props.filterState.addedPairs, function (pair) { return pairPassesFilter(pair, row); }) || hasCurrentPair && pairPassesFilter(_this.props.filterState.currentPair, row); };
-                var passesStartTimeFilter = function (row) { return !_this.props.filterState.startTime || row.original.processingStartTime >= _this.props.filterState.startTime; };
-                var passesEndTimeFilter = function (row) { return !_this.props.filterState.endTime || row.original.processingStartTime <= _this.props.filterState.endTime; };
-                var passesTextFilter = function (row) { return !_this.props.filterState.searchText || row.original.msgBody.indexOf(_this.props.filterState.searchText) !== -1; };
+                var passesSenderRecipientFilter = function (row) { return _.some(fs.addedPairs, function (pair) { return pairPassesFilter(pair, row); }) || hasCurrentPair && pairPassesFilter(fs.currentPair, row); };
+                var passesStartTimeFilter = function (row) { return !fs.startTime || row.original.processingStartTime >= fs.startTime; };
+                var passesEndTimeFilter = function (row) { return !fs.endTime || row.original.processingStartTime <= fs.endTime; };
+                var passesTextFilter = function (row) { return !fs.searchText || row.original.msgBody.indexOf(fs.searchText) !== -1; };
+                var passesProcessingStateFilter = function (row) { return fs.processingState === undefined || fs.processingState === 0 /* SUCCESS */ && row.original.stackTrace === undefined || fs.processingState === 1 /* FAIL */ && row.original.stackTrace !== undefined; };
                 var hasCurrentPair = _this.props.filterState.currentPair.senderId || _this.props.filterState.currentPair.recipientId;
                 var isFilterPresent = _this.props.filterState.addedPairs.length > 0 || hasCurrentPair;
                 return _this.props.rows.filter(function (row) {
-                    return (!isFilterPresent || passesSenderRecipientFilter(row)) && passesTextFilter(row) && passesStartTimeFilter(row) && passesEndTimeFilter(row);
+                    return (!isFilterPresent || passesSenderRecipientFilter(row)) && passesTextFilter(row) && passesStartTimeFilter(row) && passesEndTimeFilter(row) && passesProcessingStateFilter(row);
                 });
             };
             this.state = {
@@ -70,7 +72,7 @@ define(["require", "exports", 'react'], function (require, exports, React) {
                 if (index === _this.state.selectedRowIndex)
                     classNames.push('selectedRow');
                 if (rows[index].original.stackTrace)
-                    classNames.push('error');
+                    classNames.push(rows[index].isRead ? 'readError' : 'unreadError');
                 return classNames.join(" ");
             };
             return Table({

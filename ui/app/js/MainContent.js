@@ -63,6 +63,7 @@ define(["require", "exports", 'react', './ProcessedMsgsTable', './LogEventsTable
                     onRowDoubleClicked: function (row) {
                         _this.state.msgDetails = row;
                         _this.setState(_this.state);
+                        _this.props.markRowAsRead(row);
                         _this.props.onLogFilterStateChanged({
                             startTime: row.original.processingStartTime,
                             endTime: row.original.processingEndTime,

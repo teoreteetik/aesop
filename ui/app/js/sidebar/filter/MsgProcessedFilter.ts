@@ -4,7 +4,9 @@ import React = require('react');
 import IdName = require('../../util/IdName');
 import DateTimeInput = require('./DateTimeInput');
 var BS = require('react-bootstrap');
+var Button = React.createFactory(BS.Button);
 var Input = React.createFactory(BS.Input);
+var Glyphicon = React.createFactory(BS.Glyphicon);
 var R = React.DOM;
 
 export interface FilterState {
@@ -13,6 +15,13 @@ export interface FilterState {
     startTime: number;
     endTime: number;
     searchText: string;
+    processingState: ProcessingState;
+    numOfNewFailedMsgs: number;
+}
+
+export enum ProcessingState {
+    SUCCESS,
+    FAIL
 }
 
 export interface Pair {
@@ -35,14 +44,8 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
 
         var fs = this.props.filterState;
         var onChange = (e) => {
-            var selectedValue = e.target.value;
-            this.props.onFilterStateChanged({
-                startTime: undefined,
-                endTime: undefined,
-                currentPair: currentPairGetter(selectedValue),
-                addedPairs: fs.addedPairs,
-                searchText: fs.searchText
-            });
+            fs.currentPair = currentPairGetter(e.target.value);
+            this.props.onFilterStateChanged(fs);
         };
         return Input({
             value: currentValue === undefined ? '' : currentValue,
@@ -75,6 +78,23 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
         });
     };
 
+    private getProcessingStateDropdown = () => {
+        var options = [R.option({ value: '' }, ''),
+                       R.option({ value: ProcessingState[ProcessingState.SUCCESS]}, 'Successful'),
+                       R.option({ value: ProcessingState[ProcessingState.FAIL]}, 'Failed (' + this.props.filterState.numOfNewFailedMsgs + ' new)')];
+        return (
+            Input({
+                type: 'select',
+                label: 'Processing status',
+                onChange: (e) => {
+                    var newState = _.clone(this.props.filterState);
+                    newState.processingState = ProcessingState[<string>e.target.value];
+                    this.props.onFilterStateChanged(newState);
+                }
+            }, options)
+        );
+    };
+
     private getAddedComponentPairs = () => {
         var fs = this.props.filterState;
         return (
@@ -83,22 +103,19 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                                                : 'Any';
                 var recipientName = pair.recipientId ? _.find(this.props.uniqueRecipientIdNames, idName => idName.id === pair.recipientId).name
                                                      : 'Any';
-                return R.div({},
-                    R.div({className: 'control-label'}, 'Sender: ' + senderName),
-                    R.div({className: 'control-label'}, 'Recipient: ' + recipientName),
-                    R.button({
+                return R.div({style: {border: '1px solid grey', padding: '5px'}},
+                    Button({
+                        style: {float: 'right', background: 'none', border: 'none', color: 'white'},
+                        bsSize: 'xsmall',
                         onClick: () => {
-                            var newPairs = fs.addedPairs.splice(0);
-                            newPairs.splice(index, 1);
-                            this.props.onFilterStateChanged({
-                                startTime: fs.startTime,
-                                endTime: fs.endTime,
-                                currentPair: fs.currentPair,
-                                addedPairs: newPairs,
-                                searchText: fs.searchText
-                            });
+                            var newState = _.clone(fs);
+                            newState.addedPairs = fs.addedPairs.splice(0);
+                            newState.addedPairs.splice(index, 1);
+                            this.props.onFilterStateChanged(newState);
                         }
-                    }, 'Delete'))
+                    }, Glyphicon({glyph: 'remove-circle'})),
+                    R.div({className: 'control-label', style: {wordWrap: 'break-word'}}, 'Sender: ' + senderName),
+                    R.div({className: 'control-label', style: {wordWrap: 'break-word'}}, 'Recipient: ' + recipientName))
                 })
         );
     };
@@ -109,14 +126,9 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                 value: this.props.filterState.startTime,
                 label: 'Start',
                 onChange: (value: number) => {
-                    var fs = this.props.filterState;
-                    this.props.onFilterStateChanged({
-                        currentPair: fs.currentPair,
-                        addedPairs: fs.addedPairs,
-                        startTime: value,
-                        endTime: fs.endTime,
-                        searchText: fs.searchText
-                    });
+                    var newState = _.clone(this.props.filterState);
+                    newState.startTime = value;
+                    this.props.onFilterStateChanged(newState);
                 }
             })
         );
@@ -128,14 +140,9 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                 value: this.props.filterState.endTime,
                 label: 'End',
                 onChange: (value: number) => {
-                    var fs = this.props.filterState;
-                    this.props.onFilterStateChanged({
-                        currentPair: fs.currentPair,
-                        addedPairs: fs.addedPairs,
-                        startTime: fs.startTime,
-                        endTime: value,
-                        searchText: fs.searchText
-                    });
+                    var newState = _.clone(this.props.filterState);
+                    newState.endTime = value;
+                    this.props.onFilterStateChanged(newState);
                 }
             })
         );
@@ -144,40 +151,32 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
     private getAddComponentPairButton = () => {
         var fs = this.props.filterState;
         return (
-            R.button({
+            Button({
+                bsSize: 'small',
                 onClick: () => {
-                    var newPairs = fs.addedPairs.splice(0);
-                    newPairs.push({
+                    var newState = _.clone(fs);
+                    newState.addedPairs = fs.addedPairs.splice(0);
+                    newState.addedPairs.push({
                         senderId: fs.currentPair.senderId,
                         recipientId: fs.currentPair.recipientId
                     });
-                    this.props.onFilterStateChanged({
-                        startTime: fs.startTime,
-                        endTime: fs.endTime,
-                        currentPair: {
+                    newState.currentPair = {
                             senderId: undefined,
                             recipientId: undefined
-                        },
-                        addedPairs: newPairs,
-                        searchText: fs.searchText
-                    });
+                    };
+                    this.props.onFilterStateChanged(newState);
                 }
             }, 'Add')
         )
     };
 
     private getMsgBodySearchInput = () => {
-        var fs = this.props.filterState;
         return (
             Input({
-                type: 'text', label: 'Message body', onChange: (event) => {
-                    this.props.onFilterStateChanged({
-                        startTime: fs.startTime,
-                        endTime: fs.endTime,
-                        currentPair: fs.currentPair,
-                        addedPairs: fs.addedPairs,
-                        searchText: event.target.value
-                    });
+                type: 'textarea', label: 'Message body', onChange: (event) => {
+                    var newState = _.clone(this.props.filterState);
+                    newState.searchText = event.target.value;
+                    this.props.onFilterStateChanged(newState);
                 }
             })
         );
@@ -186,6 +185,7 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
     render() {
         return (
             R.div({},
+                this.getProcessingStateDropdown(),
                 this.getStartDateTimeInput(),
                 this.getEndDateTimeInput(),
                 this.getAddedComponentPairs(),

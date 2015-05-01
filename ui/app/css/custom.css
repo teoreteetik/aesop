@@ -75,8 +75,11 @@
     border-bottom: 2px solid black;
 }
 
-.error .public_fixedDataTableCell_main {
+.readError .public_fixedDataTableCell_main {
     background-color: #ebcccc !important;
+}
+.unreadError .public_fixedDataTableCell_main {
+    background-color: #c12e2a !important;
 }
 
 pre {

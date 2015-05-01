@@ -13,6 +13,7 @@ export interface Props {
     logEventRows: LogEventsTable.Row[];
     filterState: FilterSidebar.FilterState;
     onLogFilterStateChanged: (newState: LogEventFilter.FilterState) => void;
+    markRowAsRead: (row: ProcessedMsgsTable.Row) => void;
 }
 
 interface State {
@@ -102,6 +103,7 @@ class MainContent extends React.Component<Props, State> {
                 onRowDoubleClicked: (row:ProcessedMsgsTable.Row) => {
                     this.state.msgDetails = row;
                     this.setState(this.state);
+                    this.props.markRowAsRead(row);
                     this.props.onLogFilterStateChanged({
                         startTime: row.original.processingStartTime,
                         endTime: row.original.processingEndTime,

@@ -7,8 +7,15 @@ var __extends = this.__extends || function (d, b) {
 };
 define(["require", "exports", 'react', './DateTimeInput'], function (require, exports, React, DateTimeInput) {
     var BS = require('react-bootstrap');
+    var Button = React.createFactory(BS.Button);
     var Input = React.createFactory(BS.Input);
+    var Glyphicon = React.createFactory(BS.Glyphicon);
     var R = React.DOM;
+    (function (ProcessingState) {
+        ProcessingState[ProcessingState["SUCCESS"] = 0] = "SUCCESS";
+        ProcessingState[ProcessingState["FAIL"] = 1] = "FAIL";
+    })(exports.ProcessingState || (exports.ProcessingState = {}));
+    var ProcessingState = exports.ProcessingState;
     var MsgProcessedFilter = (function (_super) {
         __extends(MsgProcessedFilter, _super);
         function MsgProcessedFilter() {
@@ -19,14 +26,8 @@ define(["require", "exports", 'react', './DateTimeInput'], function (require, ex
                 options.unshift(R.option({ title: 'any', value: '' }, ''));
                 var fs = _this.props.filterState;
                 var onChange = function (e) {
-                    var selectedValue = e.target.value;
-                    _this.props.onFilterStateChanged({
-                        startTime: undefined,
-                        endTime: undefined,
-                        currentPair: currentPairGetter(selectedValue),
-                        addedPairs: fs.addedPairs,
-                        searchText: fs.searchText
-                    });
+                    fs.currentPair = currentPairGetter(e.target.value);
+                    _this.props.onFilterStateChanged(fs);
                 };
                 return Input({
                     value: currentValue === undefined ? '' : currentValue,
@@ -51,24 +52,33 @@ define(["require", "exports", 'react', './DateTimeInput'], function (require, ex
                     };
                 });
             };
+            this.getProcessingStateDropdown = function () {
+                var options = [R.option({ value: '' }, ''), R.option({ value: ProcessingState[0 /* SUCCESS */] }, 'Successful'), R.option({ value: ProcessingState[1 /* FAIL */] }, 'Failed (' + _this.props.filterState.numOfNewFailedMsgs + ' new)')];
+                return (Input({
+                    type: 'select',
+                    label: 'Processing status',
+                    onChange: function (e) {
+                        var newState = _.clone(_this.props.filterState);
+                        newState.processingState = ProcessingState[e.target.value];
+                        _this.props.onFilterStateChanged(newState);
+                    }
+                }, options));
+            };
             this.getAddedComponentPairs = function () {
                 var fs = _this.props.filterState;
                 return (fs.addedPairs.map(function (pair, index) {
                     var senderName = pair.senderId ? _.find(_this.props.uniqueSenderIdNames, function (idName) { return idName.id === pair.senderId; }).name : 'Any';
                     var recipientName = pair.recipientId ? _.find(_this.props.uniqueRecipientIdNames, function (idName) { return idName.id === pair.recipientId; }).name : 'Any';
-                    return R.div({}, R.div({ className: 'control-label' }, 'Sender: ' + senderName), R.div({ className: 'control-label' }, 'Recipient: ' + recipientName), R.button({
+                    return R.div({ style: { border: '1px solid grey', padding: '5px' } }, Button({
+                        style: { float: 'right', background: 'none', border: 'none', color: 'white' },
+                        bsSize: 'xsmall',
                         onClick: function () {
-                            var newPairs = fs.addedPairs.splice(0);
-                            newPairs.splice(index, 1);
-                            _this.props.onFilterStateChanged({
-                                startTime: fs.startTime,
-                                endTime: fs.endTime,
-                                currentPair: fs.currentPair,
-                                addedPairs: newPairs,
-                                searchText: fs.searchText
-                            });
+                            var newState = _.clone(fs);
+                            newState.addedPairs = fs.addedPairs.splice(0);
+                            newState.addedPairs.splice(index, 1);
+                            _this.props.onFilterStateChanged(newState);
                         }
-                    }, 'Delete'));
+                    }, Glyphicon({ glyph: 'remove-circle' })), R.div({ className: 'control-label', style: { wordWrap: 'break-word' } }, 'Sender: ' + senderName), R.div({ className: 'control-label', style: { wordWrap: 'break-word' } }, 'Recipient: ' + recipientName));
                 }));
             };
             this.getStartDateTimeInput = function () {
@@ -76,14 +86,9 @@ define(["require", "exports", 'react', './DateTimeInput'], function (require, ex
                     value: _this.props.filterState.startTime,
                     label: 'Start',
                     onChange: function (value) {
-                        var fs = _this.props.filterState;
-                        _this.props.onFilterStateChanged({
-                            currentPair: fs.currentPair,
-                            addedPairs: fs.addedPairs,
-                            startTime: value,
-                            endTime: fs.endTime,
-                            searchText: fs.searchText
-                        });
+                        var newState = _.clone(_this.props.filterState);
+                        newState.startTime = value;
+                        _this.props.onFilterStateChanged(newState);
                     }
                 }));
             };
@@ -92,58 +97,45 @@ define(["require", "exports", 'react', './DateTimeInput'], function (require, ex
                     value: _this.props.filterState.endTime,
                     label: 'End',
                     onChange: function (value) {
-                        var fs = _this.props.filterState;
-                        _this.props.onFilterStateChanged({
-                            currentPair: fs.currentPair,
-                            addedPairs: fs.addedPairs,
-                            startTime: fs.startTime,
-                            endTime: value,
-                            searchText: fs.searchText
-                        });
+                        var newState = _.clone(_this.props.filterState);
+                        newState.endTime = value;
+                        _this.props.onFilterStateChanged(newState);
                     }
                 }));
             };
             this.getAddComponentPairButton = function () {
                 var fs = _this.props.filterState;
-                return (R.button({
+                return (Button({
+                    bsSize: 'small',
                     onClick: function () {
-                        var newPairs = fs.addedPairs.splice(0);
-                        newPairs.push({
+                        var newState = _.clone(fs);
+                        newState.addedPairs = fs.addedPairs.splice(0);
+                        newState.addedPairs.push({
                             senderId: fs.currentPair.senderId,
                             recipientId: fs.currentPair.recipientId
                         });
-                        _this.props.onFilterStateChanged({
-                            startTime: fs.startTime,
-                            endTime: fs.endTime,
-                            currentPair: {
-                                senderId: undefined,
-                                recipientId: undefined
-                            },
-                            addedPairs: newPairs,
-                            searchText: fs.searchText
-                        });
+                        newState.currentPair = {
+                            senderId: undefined,
+                            recipientId: undefined
+                        };
+                        _this.props.onFilterStateChanged(newState);
                     }
                 }, 'Add'));
             };
             this.getMsgBodySearchInput = function () {
-                var fs = _this.props.filterState;
                 return (Input({
-                    type: 'text',
+                    type: 'textarea',
                     label: 'Message body',
                     onChange: function (event) {
-                        _this.props.onFilterStateChanged({
-                            startTime: fs.startTime,
-                            endTime: fs.endTime,
-                            currentPair: fs.currentPair,
-                            addedPairs: fs.addedPairs,
-                            searchText: event.target.value
-                        });
+                        var newState = _.clone(_this.props.filterState);
+                        newState.searchText = event.target.value;
+                        _this.props.onFilterStateChanged(newState);
                     }
                 }));
             };
         }
         MsgProcessedFilter.prototype.render = function () {
-            return (R.div({}, this.getStartDateTimeInput(), this.getEndDateTimeInput(), this.getAddedComponentPairs(), this.getSenderDropDown(), this.getRecipientDropdown(), this.getAddComponentPairButton(), this.getMsgBodySearchInput()));
+            return (R.div({}, this.getProcessingStateDropdown(), this.getStartDateTimeInput(), this.getEndDateTimeInput(), this.getAddedComponentPairs(), this.getSenderDropDown(), this.getRecipientDropdown(), this.getAddComponentPairButton(), this.getMsgBodySearchInput()));
         };
         return MsgProcessedFilter;
     })(React.Component);
