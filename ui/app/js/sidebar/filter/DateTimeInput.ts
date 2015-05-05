@@ -37,7 +37,7 @@ class DateTimeInput extends React.Component<Props, State> {
     private onChange: (event) => void = event => {
         var timeString = (<any>this.refs['timeInput']).getInputDOMNode().value;
         var dateString = (<any>this.refs['dateInput']).getInputDOMNode().value;
-        var date: moment.Moment = moment(timeString + ' ' + dateString, 'HH:mm:ss DD.MM.YYYY', true);
+        var date: moment.Moment = moment(`${timeString} ${dateString}`, 'HH:mm:ss DD.MM.YYYY', true);
         if (date.isValid())
             this.props.onChange(date.valueOf());
         else
@@ -49,7 +49,7 @@ class DateTimeInput extends React.Component<Props, State> {
                 Col({ xs: 5, style: { paddingRight: 0 } },
                     Input({
                         ref: 'timeInput',
-                        label: this.props.label + ' time',
+                        label: `${this.props.label} time`,
                         type: 'text',
                         placeholder: 'HH:mm:ss',
                         onChange: this.onChange,
@@ -59,7 +59,7 @@ class DateTimeInput extends React.Component<Props, State> {
                 Col({ xs: 7 },
                     Input({
                         ref: 'dateInput',
-                        label: this.props.label + ' date',
+                        label: `${this.props.label} date`,
                         type: 'text',
                         placeholder: 'dd.MM.yyyy',
                         onChange: this.onChange,

@@ -61,7 +61,7 @@ define(["require", "exports", 'react', './AnalyzersList', './filter/FilterSideba
             };
         }
         Sidebar.prototype.render = function () {
-            return (R.div({ id: 'sidebar' }, R.ul({ className: 'sidebar-nav' }, R.li({ className: 'sidebar-brand' }, R.a({ href: '#' }, 'Aesop')), R.li({}, this.getVisibleButtons())), this.getCurrentContent()));
+            return (R.div({ id: 'sidebar' }, R.ul({ className: 'sidebar-nav' }, R.li({ className: 'sidebar-brand' }, R.a({ href: '#' }, '')), R.li({}, this.getVisibleButtons())), this.getCurrentContent()));
         };
         return Sidebar;
     })(React.Component);

@@ -38,7 +38,10 @@ export interface Props {
 
 class MsgProcessedFilter extends React.Component<Props, {}> {
 
-    private getComponentDropdown = (label:string, currentValue:string, items:IdName[], currentPairGetter:(selectedValue:string) => Pair) => {
+    private getComponentDropdown = (label: string,
+                                    currentValue: string,
+                                    items: IdName[],
+                                    currentPairGetter: (selectedValue:string) => Pair) => {
         var options = items.map(idName => R.option({ title: idName.id, value: idName.id }, idName.name));
         options.unshift(R.option({ title: 'any', value: '' }, ''));
 
@@ -81,7 +84,7 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
     private getProcessingStateDropdown = () => {
         var options = [R.option({ value: '' }, ''),
                        R.option({ value: ProcessingState[ProcessingState.SUCCESS]}, 'Successful'),
-                       R.option({ value: ProcessingState[ProcessingState.FAIL]}, 'Failed (' + this.props.filterState.numOfNewFailedMsgs + ' new)')];
+                       R.option({ value: ProcessingState[ProcessingState.FAIL]}, `Failed (${this.props.filterState.numOfNewFailedMsgs} new)`)];
         return (
             Input({
                 type: 'select',
@@ -114,8 +117,8 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                             this.props.onFilterStateChanged(newState);
                         }
                     }, Glyphicon({glyph: 'remove-circle'})),
-                    R.div({className: 'control-label', style: {wordWrap: 'break-word'}}, 'Sender: ' + senderName),
-                    R.div({className: 'control-label', style: {wordWrap: 'break-word'}}, 'Recipient: ' + recipientName))
+                    R.div({className: 'control-label', style: {wordWrap: 'break-word'}}, `Sender: ${senderName}`),
+                    R.div({className: 'control-label', style: {wordWrap: 'break-word'}}, `Recipient: ${recipientName}`))
                 })
         );
     };

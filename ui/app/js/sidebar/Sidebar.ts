@@ -91,7 +91,7 @@ class Sidebar extends React.Component<Props, State> {
             R.div({ id: 'sidebar' },
                 R.ul({ className: 'sidebar-nav' },
                     R.li({ className: 'sidebar-brand' },
-                        R.a({ href: '#' }, 'Aesop')),
+                        R.a({ href: '#' }, '')),
                     R.li({},
                         this.getVisibleButtons())),
                 this.getCurrentContent())

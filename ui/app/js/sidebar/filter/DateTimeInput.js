@@ -18,7 +18,7 @@ define(["require", "exports", 'react', 'moment'], function (require, exports, Re
             this.onChange = function (event) {
                 var timeString = _this.refs['timeInput'].getInputDOMNode().value;
                 var dateString = _this.refs['dateInput'].getInputDOMNode().value;
-                var date = moment(timeString + ' ' + dateString, 'HH:mm:ss DD.MM.YYYY', true);
+                var date = moment("" + timeString + " " + dateString, 'HH:mm:ss DD.MM.YYYY', true);
                 if (date.isValid())
                     _this.props.onChange(date.valueOf());
                 else
@@ -41,14 +41,14 @@ define(["require", "exports", 'react', 'moment'], function (require, exports, Re
         DateTimeInput.prototype.render = function () {
             return (Row({}, Col({ xs: 5, style: { paddingRight: 0 } }, Input({
                 ref: 'timeInput',
-                label: this.props.label + ' time',
+                label: "" + this.props.label + " time",
                 type: 'text',
                 placeholder: 'HH:mm:ss',
                 onChange: this.onChange,
                 value: this.state.timeString
             })), Col({ xs: 7 }, Input({
                 ref: 'dateInput',
-                label: this.props.label + ' date',
+                label: "" + this.props.label + " date",
                 type: 'text',
                 placeholder: 'dd.MM.yyyy',
                 onChange: this.onChange,

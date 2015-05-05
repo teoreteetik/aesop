@@ -53,7 +53,7 @@ define(["require", "exports", 'react', './DateTimeInput'], function (require, ex
                 });
             };
             this.getProcessingStateDropdown = function () {
-                var options = [R.option({ value: '' }, ''), R.option({ value: ProcessingState[0 /* SUCCESS */] }, 'Successful'), R.option({ value: ProcessingState[1 /* FAIL */] }, 'Failed (' + _this.props.filterState.numOfNewFailedMsgs + ' new)')];
+                var options = [R.option({ value: '' }, ''), R.option({ value: ProcessingState[0 /* SUCCESS */] }, 'Successful'), R.option({ value: ProcessingState[1 /* FAIL */] }, "Failed (" + _this.props.filterState.numOfNewFailedMsgs + " new)")];
                 return (Input({
                     type: 'select',
                     label: 'Processing status',
@@ -78,7 +78,7 @@ define(["require", "exports", 'react', './DateTimeInput'], function (require, ex
                             newState.addedPairs.splice(index, 1);
                             _this.props.onFilterStateChanged(newState);
                         }
-                    }, Glyphicon({ glyph: 'remove-circle' })), R.div({ className: 'control-label', style: { wordWrap: 'break-word' } }, 'Sender: ' + senderName), R.div({ className: 'control-label', style: { wordWrap: 'break-word' } }, 'Recipient: ' + recipientName));
+                    }, Glyphicon({ glyph: 'remove-circle' })), R.div({ className: 'control-label', style: { wordWrap: 'break-word' } }, "Sender: " + senderName), R.div({ className: 'control-label', style: { wordWrap: 'break-word' } }, "Recipient: " + recipientName));
                 }));
             };
             this.getStartDateTimeInput = function () {
