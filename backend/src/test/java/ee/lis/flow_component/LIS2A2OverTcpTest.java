@@ -1,19 +1,15 @@
-package ee.lis;
+package ee.lis.flow_component;
 
-import static ee.lis.TestUtils.Analysis;
-import static ee.lis.TestUtils.Container;
-import static ee.lis.TestUtils.MyLabResultMsg;
-import static ee.lis.TestUtils.Order;
-import static ee.lis.TestUtils.Patient;
-import static ee.lis.TestUtils.Result;
 import static ee.lis.TestUtils.*;
 import static java.util.Arrays.asList;
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
-import ee.lis.interfaces.MyLabMessages.*;
+import ee.lis.driver.DynamicDriver;
 import ee.lis.mock.MockLIS;
 import ee.lis.mock.MockSocketAnalyzer;
 import ee.lis.mock.MockSocketAnalyzer.Mode;
@@ -27,6 +23,7 @@ public class LIS2A2OverTcpTest {
     private static ActorSystem system;
     private static MockSocketAnalyzer mockAnalyzer;
     private static MockLIS mockLIS;
+
     @BeforeClass
     public static void setup() {
         system = ActorSystem.create("testSystem");
@@ -95,7 +92,7 @@ public class LIS2A2OverTcpTest {
                 .expect("<ACK>")
                 .send("<STX>1H|\\^&||PSWD|Harper Labs|2937 Southwestern Avenue^Buffalo^NY^73205||319412-9722||||P|1394-97|19890314121122<CR><ETX>{CS}<CR><LF>")
                 .expect("<ACK>")
-                .send("<STX>1Q|1|^SpecimenID1\\^SpecimenID2||^^^ALL<CR><ETX>{CS}<CR><LF>")
+                .send("<STX>1QS|1|^SpecimenID1\\^SpecimenID2||^^^ALL<CR><ETX>{CS}<CR><LF>")
                 .expect("<ACK>")
                 .send("<STX>2L|1<CR><ETX>{CS}<CR><LF>")
                 .expect("<ACK>")
@@ -103,10 +100,29 @@ public class LIS2A2OverTcpTest {
                 .expectNoMsg();
 
             mockLIS
-                .expect(new MyLabQueryMsg(asList("SpecimenID1", "SpecimenID2"), asList("ALL")))
-                .send(new MyLabOrderMsg(new Order(new Patient("Allen", "Pohl", "12345"),
-                    asList(new Container("SpecimenID1", asList(new Analysis("An1", "Analysis1", null), new Analysis("An2", "Analysis2", null))),
-                        new Container("SpecimenID2", asList(new Analysis("An5", "Analysis5", null)))))));
+                .expect(
+                    MyLabQueryMsg(asList("SpecimenID1", "SpecimenID2"),
+                                  asList("ALL")))
+                .send(
+                    MyLabOrderMsg(
+                        Order(
+                            Patient("Allen", "Pohl", "12345"),
+                            containers(
+                                Container("SpecimenID1",
+                                          analyses(
+                                              Analysis("An1", "Analysis1", null),
+                                              Analysis("An2", "Analysis2", null)
+                                          )
+                                ),
+                                Container("SpecimenID2",
+                                          analyses(
+                                              Analysis("An5", "Analysis5", null)
+                                          )
+                                )
+                            )
+                        )
+                    )
+                );
 
             mockAnalyzer
                 .expect("<ENQ>")

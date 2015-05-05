@@ -18,8 +18,8 @@ public class MyLabHttpClient extends FlowComponent<MyLabHttpClientConf> {
     @Override
     protected PartialFunction<Object, BoxedUnit> getBehaviour() {
         return ReceiveBuilder
-            .match(MyLabResultMsg.class, this::sendResult)
-            .match(MyLabQueryMsg.class, this::sendQuery)
+            .match(MyLabResultMsg.class, result -> this.sendResult(result))
+            .match(MyLabQueryMsg.class, query -> this.sendQuery(query))
             .build();
     }
 

@@ -22,7 +22,7 @@ public abstract class LIS2A2Record {
             fields.put(i, new Field(parts[i]));
 
         Type recordType = Type.valueOf(fields.get(0).toPrimitiveField().asString());
-        DelimitedData<Field> data = new DelimitedData<Field>("|", fields);
+        DelimitedData<Field> data = new DelimitedData<>("|", fields);
         switch (recordType) {
             case H: return new H(data);
             case P: return new P(data);
@@ -96,5 +96,21 @@ public abstract class LIS2A2Record {
 
     protected List<Field> getRepeats(int fieldIndex) {
         return data.get(fieldIndex - 1).asRepeatField().getRepeats();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LIS2A2Record that = (LIS2A2Record) o;
+
+        return data.equals(that.data);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return data.hashCode();
     }
 }

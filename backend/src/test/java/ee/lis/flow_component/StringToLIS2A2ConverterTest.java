@@ -1,17 +1,13 @@
-package ee.lis;
+package ee.lis.flow_component;
 
 import static ee.lis.TestUtils.convertLowLevelChars;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import ee.lis.core.RecipientConf;
 import ee.lis.flow_component.astm_to_string.StringToLIS2A2Converter;
 import ee.lis.interfaces.astm.msg.LIS2A2ResultMsg;
-import ee.lis.interfaces.astm.record.O;
-import ee.lis.interfaces.astm.record.P;
-import ee.lis.interfaces.astm.record.R;
-import ee.lis.util.CommonProtocol.RecipientConf;
-import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -45,24 +41,13 @@ public class StringToLIS2A2ConverterTest {
                     "R|2|^^^Bio|BH+^Beta Hemolytic|||N<CR>" +
                     "L|1<CR>");
 
-            final JavaTestKit recipient = new JavaTestKit(system);
-            stringToAstmConverter.tell(new RecipientConf(recipient.getRef()), getRef());
+            final JavaTestKit probe = new JavaTestKit(system);
+            stringToAstmConverter.tell(new RecipientConf(probe.getRef()), getRef());
+
             stringToAstmConverter.tell(resultMessage, getRef());
-            LIS2A2ResultMsg received = recipient.expectMsgClass(LIS2A2ResultMsg.class);
-            List<P> patientRecords = received.getPatientRecords();
-            Assert.assertEquals(1, patientRecords.size());
 
-            P patientRecord = patientRecords.get(0);
-
-            Assert.assertEquals("Smith", patientRecord.getSurname());
-            Assert.assertEquals("John", patientRecord.getFirstName());
-            Assert.assertEquals("52483291", patientRecord.getPatientId());
-
-            List<O> orderRecords = received.getOrderRecords(patientRecords.get(0));
-            Assert.assertEquals(1, orderRecords.size());
-
-            List<R> resultRecords = received.getResultRecords(orderRecords.get(0));
-            Assert.assertEquals(2, resultRecords.size());
+            LIS2A2ResultMsg received = probe.expectMsgClass(LIS2A2ResultMsg.class);
+            Assert.assertEquals(resultMessage, received.asString());
         }};
     }
 }

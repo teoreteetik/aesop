@@ -1,8 +1,8 @@
 package ee.lis.flow_component.astm_to_string;
 
 import akka.japi.pf.ReceiveBuilder;
+import ee.lis.core.RecipientConf;
 import ee.lis.interfaces.astm.msg.LIS2A2Msg;
-import ee.lis.util.CommonProtocol.RecipientConf;
 import ee.lis.core.FlowComponent;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;

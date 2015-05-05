@@ -43,6 +43,7 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
     }
 
     private void goToSendingState(String msgToSend) {
+        log.debug("Transitioning to sending state");
         sendingFrameNumber = 0;
         msgBeingSent.clear();
         Collections.addAll(msgBeingSent, msgToSend.split("(?<=" + CR + ")"));
@@ -51,6 +52,7 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
     }
 
     private void goToReceivingState() {
+        log.debug("Transitioning to receiving state");
         msgBeingReceived.setLength(0);
         conf.lowLevelRecipient.tell(ACKBytes, self());
         context().become(receivingState);
@@ -86,6 +88,7 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
     }
 
     private void goToIdleState() {
+        log.debug("Transitioning to idle state");
         unstashAll();
         context().become(idleState);
     }
@@ -102,7 +105,9 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
 
     private void sendNextFrameInBuffer() {
         String nextFrame = msgBeingSent.remove(0);
+        log.debug("Sending next frame in buffer - " + nextFrame);
         if (nextFrame.length() > conf.maxFrameSize) {
+            log.debug("Frame length is longer than " + conf.maxFrameSize + ", splitting frame");
             String partToSend = nextFrame.substring(0, conf.maxFrameSize);
             String remainingPart = nextFrame.substring(conf.maxFrameSize);
             msgBeingSent.add(0, remainingPart);

@@ -2,6 +2,7 @@ package ee.lis.flow_component.astm_to_mylis;
 
 import akka.japi.pf.ReceiveBuilder;
 import ee.lis.core.FlowComponent;
+import ee.lis.core.RecipientConf;
 import ee.lis.interfaces.MyLabMessages.Analysis;
 import ee.lis.interfaces.MyLabMessages.Container;
 import ee.lis.interfaces.MyLabMessages.MyLabOrderMsg;
@@ -10,7 +11,6 @@ import ee.lis.interfaces.astm.record.H;
 import ee.lis.interfaces.astm.record.L;
 import ee.lis.interfaces.astm.record.O;
 import ee.lis.interfaces.astm.record.P;
-import ee.lis.util.CommonProtocol.RecipientConf;
 import java.util.Date;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;

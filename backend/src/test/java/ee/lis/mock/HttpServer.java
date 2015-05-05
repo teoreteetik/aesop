@@ -1,4 +1,4 @@
-package ee.lis;
+package ee.lis.mock;
 
 import akka.actor.ActorRef;
 import akka.japi.pf.ReceiveBuilder;
@@ -60,7 +60,6 @@ public class HttpServer extends FlowComponent<HttpServerConf> {
             }
         }
     }
-
 
     @Override
     protected void init() throws Exception {

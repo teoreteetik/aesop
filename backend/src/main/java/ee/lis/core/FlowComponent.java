@@ -6,7 +6,6 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.pf.ReceiveBuilder;
 import ee.lis.core.observer.ObserverProtocol.MsgProcessed;
-import ee.lis.util.CommonProtocol.ConfMsg;
 import java.util.Collections;
 import java.util.Set;
 import scala.Option;

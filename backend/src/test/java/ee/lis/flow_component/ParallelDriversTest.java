@@ -1,15 +1,15 @@
-package ee.lis;
+package ee.lis.flow_component;
 
 import static com.typesafe.config.ConfigValueFactory.fromAnyRef;
+import static ee.lis.TestUtils.*;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import ee.lis.core.Master;
-import ee.lis.interfaces.MyLabMessages.*;
+import ee.lis.interfaces.MyLabMessages.MyLabOrderMsg;
 import ee.lis.mock.MockLIS;
 import ee.lis.mock.MockSocketAnalyzer;
 import ee.lis.mock.MockSocketAnalyzer.Mode;
@@ -99,36 +99,6 @@ public class ParallelDriversTest {
             system = null;
         }
 
-        @Test
-        public void validateMessagesReceivedByLIS() {
-            List<String> lisExpectedMsgs = new ArrayList<>();
-            String resultJson = JsonUtil.asJson(
-                new MyLabResultMsg(new Order(new Patient("John", "Smith", "52483291"),
-                    singletonList(new Container("5762",
-                        asList(new Analysis("Org#", "", new Result("51", "")),
-                            new Analysis("Bio", "", new Result("BH+", ""))))))));
-            String queryJson = JsonUtil.asJson(
-                new MyLabQueryMsg(asList("SpecimenID1", "SpecimenID2"), singletonList("ALL"))
-            );
-            MyLabOrderMsg orderMsg = new MyLabOrderMsg(new Order(new Patient("Allen", "Pohl", "12345"),
-                asList(new Container("SpecimenID1", asList(new Analysis("An1", "Analysis1", null), new Analysis("An2", "Analysis2", null))),
-                    new Container("SpecimenID2", singletonList(new Analysis("An5", "Analysis5", null))))));
-
-            for (int i = 0; i < 10; i++) {
-                lisExpectedMsgs.add(resultJson);
-                lisExpectedMsgs.add(queryJson);
-            }
-
-            while (!lisExpectedMsgs.isEmpty()) {
-                String receivedMsg = mockLIS.expectAnyString();
-                lisExpectedMsgs.remove(receivedMsg);
-                if (receivedMsg.equals(resultJson))
-                    mockLIS.send("");
-                else if (receivedMsg.equals(queryJson))
-                    mockLIS.send(orderMsg);
-            }
-        }
-
         @Test public void testAnalyzer1()  { executeSequence(mockAnalyzer1);  }
         @Test public void testAnalyzer2()  { executeSequence(mockAnalyzer2);  }
         @Test public void testAnalyzer3()  { executeSequence(mockAnalyzer3);  }
@@ -139,6 +109,62 @@ public class ParallelDriversTest {
         @Test public void testAnalyzer8()  { executeSequence(mockAnalyzer8);  }
         @Test public void testAnalyzer9()  { executeSequence(mockAnalyzer9);  }
         @Test public void testAnalyzer10() { executeSequence(mockAnalyzer10); }
+
+        @Test
+        public void validateMessagesReceivedByLIS() {
+            List<String> lisExpectedMsgs = new ArrayList<>();
+            String resultJson = JsonUtil.asJson(
+                MyLabResultMsg(
+                    Order(
+                        Patient("John", "Smith", "52483291"),
+                        containers(
+                            Container("5762",
+                                      analyses(
+                                          Analysis("Org#", "", Result("51", "")),
+                                          Analysis("Bio", "", Result("BH+", ""))
+                                      )
+                            )
+                        )
+                    )
+                )
+            );
+            String queryJson = JsonUtil.asJson(
+                MyLabQueryMsg(asList("SpecimenID1", "SpecimenID2"),
+                              asList("ALL"))
+            );
+            for (int i = 0; i < 10; i++) {
+                lisExpectedMsgs.add(resultJson);
+                lisExpectedMsgs.add(queryJson);
+            }
+
+
+            MyLabOrderMsg orderMsg = MyLabOrderMsg(
+                Order(
+                    Patient("Allen", "Pohl", "12345"),
+                    containers(
+                        Container("SpecimenID1",
+                            analyses(
+                                Analysis("An1", "Analysis1", null),
+                                Analysis("An2", "Analysis2", null)
+                            )
+                        ),
+                        Container("SpecimenID2",
+                            analyses(
+                                Analysis("An5", "Analysis5", null)
+                            )
+                        )
+                    )
+                )
+            );
+            while (!lisExpectedMsgs.isEmpty()) {
+                String receivedMsg = mockLIS.expectAnyString();
+                lisExpectedMsgs.remove(receivedMsg);
+                if (receivedMsg.equals(resultJson))
+                    mockLIS.send("");
+                else if (receivedMsg.equals(queryJson))
+                    mockLIS.send(orderMsg);
+            }
+        }
 
         private void executeSequence(MockSocketAnalyzer mockAnalyzer) {
             queryAndReceiveOrder(mockAnalyzer);

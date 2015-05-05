@@ -4,12 +4,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
-import ee.lis.HttpServer;
 import ee.lis.interfaces.MyLabMessages.MyLabOrderMsg;
 import ee.lis.interfaces.MyLabMessages.MyLabQueryMsg;
 import ee.lis.interfaces.MyLabMessages.MyLabResultMsg;
 import ee.lis.util.JsonUtil;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import scala.concurrent.duration.FiniteDuration;
@@ -19,7 +17,7 @@ public class MockLIS {
     private final JavaTestKit httpProbe;
 
     public MockLIS(ActorSystem system, String address, int port) {
-        mockLIS = system.actorOf(Props.create(HttpServer.class), "mockLIS");
+        mockLIS = system.actorOf(Props.create(HttpServer.class));
         httpProbe = new JavaTestKit(system);
         mockLIS.tell(new HttpServerConf(address, port, httpProbe.getRef()), ActorRef.noSender());
     }

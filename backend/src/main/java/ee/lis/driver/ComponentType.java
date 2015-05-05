@@ -2,6 +2,8 @@ package ee.lis.driver;
 
 import akka.actor.ActorContext;
 import com.typesafe.config.Config;
+import ee.lis.core.ConfMsg;
+import ee.lis.core.RecipientConf;
 import ee.lis.flow_component.astm_to_mylis.LIS2A2ToMyLabConverter;
 import ee.lis.flow_component.astm_to_string.LIS2A2ToStringConverter;
 import ee.lis.flow_component.astme138195.AstmE138195Actor;
@@ -13,8 +15,6 @@ import ee.lis.flow_component.socket.SocketClient;
 import ee.lis.flow_component.socket.SocketClientConf;
 import ee.lis.flow_component.socket.SocketServer;
 import ee.lis.flow_component.socket.SocketServerConf;
-import ee.lis.util.CommonProtocol.ConfMsg;
-import ee.lis.util.CommonProtocol.RecipientConf;
 import ee.lis.core.FlowComponent;
 import java.util.function.BiFunction;
 import ee.lis.flow_component.mylab_http.MyLabHttpClient;

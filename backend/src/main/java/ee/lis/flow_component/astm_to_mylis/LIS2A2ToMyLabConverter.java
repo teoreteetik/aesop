@@ -4,12 +4,12 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import akka.japi.pf.ReceiveBuilder;
 import ee.lis.core.FlowComponent;
+import ee.lis.core.RecipientConf;
 import ee.lis.interfaces.MyLabMessages.*;
 import ee.lis.interfaces.astm.msg.LIS2A2QueryMsg;
 import ee.lis.interfaces.astm.msg.LIS2A2ResultMsg;
 import ee.lis.interfaces.astm.record.O;
 import ee.lis.interfaces.astm.record.P;
-import ee.lis.util.CommonProtocol.RecipientConf;
 import java.util.ArrayList;
 import java.util.List;
 import scala.PartialFunction;
@@ -25,26 +25,46 @@ public class LIS2A2ToMyLabConverter extends FlowComponent<RecipientConf> {
     }
 
     private void convertAndForwardResult(LIS2A2ResultMsg LIS2A2ResultMsg) {
-        for (MyLabResultMsg myLabResultMsg : astmResultMsgToMyLabResultMsgs(LIS2A2ResultMsg))
+        for (MyLabResultMsg myLabResultMsg : lis2a2ResultMsgToMyLabResultMsgs(LIS2A2ResultMsg))
             conf.recipient.tell(myLabResultMsg, self());
     }
 
-    public List<MyLabResultMsg> astmResultMsgToMyLabResultMsgs(LIS2A2ResultMsg LIS2A2ResultMsg) {
+    public List<MyLabResultMsg> lis2a2ResultMsgToMyLabResultMsgs(LIS2A2ResultMsg LIS2A2ResultMsg) {
+        log.debug("Converting LIS2A2 message to MyLabResultMsg");
         List<MyLabResultMsg> result = new ArrayList<>();
         for (P patientRecord : LIS2A2ResultMsg.getPatientRecords()) {
+            log.debug("Finding O records for " + patientRecord.asString());
             for (O orderRecord : LIS2A2ResultMsg.getOrderRecords(patientRecord)) {
+                log.debug("Finding R records for " + orderRecord.asString());
                 List<Analysis> analyses = LIS2A2ResultMsg.getResultRecords(orderRecord).stream().map(
-                            resultRecord -> new Analysis(resultRecord.getAnalysisCode(),
-                                                         resultRecord.getAnalysisName(),
-                                                         new Result(resultRecord.getResultValue(),
-                                                                    resultRecord.getUnit()))).collect(toList());
-                        MyLabResultMsg myLisMyLISResultMsg = new MyLabResultMsg(new Order(
-                                                                              new Patient(patientRecord.getFirstName(),
-                                                                                          patientRecord.getSurname(),
-                                                                                          patientRecord.getPatientId()),
-                                                                              asList(new Container(orderRecord.getSpecimenId(),
-                                                                                  analyses))));
-                        result.add(myLisMyLISResultMsg);
+                    resultRecord -> {
+                        log.debug("Converting Result record to Analysis - " + resultRecord.toString());
+                        return new Analysis(
+                            resultRecord.getAnalysisCode(),
+                            resultRecord.getAnalysisName(),
+                            new Result(
+                                resultRecord.getResultValue(),
+                                resultRecord.getUnit()
+                            )
+                        );
+                    }).collect(toList());
+
+                MyLabResultMsg myLabResultMsg = new MyLabResultMsg(
+                    new Order(
+                        new Patient(
+                            patientRecord.getFirstName(),
+                            patientRecord.getSurname(),
+                            patientRecord.getPatientId()
+                        ),
+                        asList(
+                            new Container(
+                                orderRecord.getSpecimenId(),
+                                analyses
+                            )
+                        )
+                    )
+                );
+                result.add(myLabResultMsg);
             }
         }
         return result;

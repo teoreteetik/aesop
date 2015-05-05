@@ -71,6 +71,7 @@ public class MyLabMessages {
             this.patient = patient;
             this.containers = containers;
         }
+
         public Order() {
             this(null, null);
         }

@@ -51,4 +51,12 @@ public class TestUtils {
     public static List<Container> containers(Container... containers) {
         return Arrays.asList(containers);
     }
+
+    public static MyLabQueryMsg MyLabQueryMsg(List<String> specimenIds, List<String> analysisCodes) {
+        return new MyLabQueryMsg(specimenIds, analysisCodes);
+    }
+
+    public static MyLabOrderMsg MyLabOrderMsg(Order order) {
+        return new MyLabOrderMsg(order);
+    }
 }

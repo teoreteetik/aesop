@@ -3,7 +3,7 @@ package ee.lis.flow_component.astme138195;
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import com.typesafe.config.Config;
-import ee.lis.util.CommonProtocol.ConfMsg;
+import ee.lis.core.ConfMsg;
 import java.util.concurrent.TimeUnit;
 import scala.concurrent.Await;
 import scala.concurrent.Future;

@@ -3,6 +3,7 @@ package ee.lis.flow_component.astm_to_string;
 import static ee.lis.util.LowLevelUtils.CR;
 import akka.japi.pf.ReceiveBuilder;
 import ee.lis.core.FlowComponent;
+import ee.lis.core.RecipientConf;
 import ee.lis.interfaces.astm.msg.*;
 import ee.lis.interfaces.astm.msg.LIS2A2Msg;
 import ee.lis.interfaces.astm.msg.LIS2A2QueryMsg;
@@ -10,7 +11,6 @@ import ee.lis.interfaces.astm.record.LIS2A2Record;
 import ee.lis.interfaces.astm.record.O;
 import ee.lis.interfaces.astm.record.Q;
 import ee.lis.interfaces.astm.record.R;
-import ee.lis.util.CommonProtocol.RecipientConf;
 import java.util.ArrayList;
 import java.util.List;
 import scala.PartialFunction;
@@ -33,7 +33,9 @@ public class StringToLIS2A2Converter extends FlowComponent<RecipientConf> {
         List<LIS2A2Record> records = new ArrayList<>();
         String[] recordLines = msgAsString.split("(?<=" + CR + ")");
         for (String record : recordLines) {
+            log.debug("Converting String '" + record + "' into LIS2A2Record");
             LIS2A2Record lis2a2Record = LIS2A2Record.fromString(record);
+            log.debug("Conversion successful, lis2a2Record.toString() = " + lis2a2Record.toString());
             records.add(lis2a2Record);
         }
 
@@ -45,10 +47,11 @@ public class StringToLIS2A2Converter extends FlowComponent<RecipientConf> {
         else if (msgType.equals(LIS2A2QueryMsg.class))
             return new LIS2A2QueryMsg(records);
         else
-            throw new RuntimeException("Unexpected message type");
+            throw new RuntimeException("Unexpected message type - " + msgType);
     }
 
     public Class<? extends LIS2A2Msg> getMsgType(List<LIS2A2Record> records) {
+        log.debug("Detecting message type");
         Class<? extends LIS2A2Msg> msgType = null;
         for (LIS2A2Record record : records)
             if (record instanceof O)
