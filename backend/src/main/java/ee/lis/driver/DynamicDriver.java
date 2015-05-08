@@ -1,10 +1,9 @@
 package ee.lis.driver;
 
+import static akka.actor.SupervisorStrategy.*;
 import static java.util.stream.Collectors.toList;
-import akka.actor.AbstractActor;
-import akka.actor.ActorContext;
-import akka.actor.ActorRef;
-import akka.actor.Props;
+import akka.actor.*;
+import akka.japi.pf.DeciderBuilder;
 import akka.japi.pf.ReceiveBuilder;
 import com.typesafe.config.Config;
 import ee.lis.core.ConfMsg;
@@ -12,13 +11,22 @@ import ee.lis.core.observer.ObserverProtocol.AnalyzerInitialized;
 import ee.lis.util.ConfigUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import scala.concurrent.duration.FiniteDuration;
 
 public class DynamicDriver extends AbstractActor {
 
     private final List<Component> components = new ArrayList<>();
+    private final SupervisorStrategy supervisorStrategy;
 
     private DynamicDriver() {
+        supervisorStrategy = new OneForOneStrategy(20, FiniteDuration.apply(1, TimeUnit.MINUTES), DeciderBuilder.
+            match(ActorInitializationException.class, e -> escalate()).
+            match(ActorKilledException.class, e -> stop()).
+            match(Exception.class, e -> restart()).
+            matchAny(__ -> escalate()).build());
+
         receive(
             ReceiveBuilder
                 .match(Config.class, config -> {
@@ -38,6 +46,11 @@ public class DynamicDriver extends AbstractActor {
         );
     }
 
+    @Override
+    public SupervisorStrategy supervisorStrategy() {
+        return supervisorStrategy;
+    }
+
     private static class Component {
         public final String name;
         public final ActorRef actorRef;
@@ -49,7 +62,4 @@ public class DynamicDriver extends AbstractActor {
             this.confFunction = confFunction;
         }
     }
-
-
-
 }
