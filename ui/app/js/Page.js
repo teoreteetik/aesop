@@ -7,14 +7,16 @@ var __extends = this.__extends || function (d, b) {
 };
 define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/Sidebar', './util/FormatUtil', './MainContent'], function (require, exports, React, _, WebSocketMsgs, Sidebar, FormatUtil, MainContent) {
     var R = React.DOM;
-    var _Page = (function (_super) {
-        __extends(_Page, _super);
-        function _Page(props) {
+    var Page = (function (_super) {
+        __extends(Page, _super);
+        function Page(props) {
             var _this = this;
             _super.call(this, props);
             this.initSocket = function () {
-                var socket = new WebSocket("ws://127.0.0.1:8900");
-                socket.onmessage = function (wsEvent) {
+                _this.props.socket.onclose = function (event) {
+                    alert('Connection to middleware was closed!');
+                };
+                _this.props.socket.onmessage = function (wsEvent) {
                     var mwEvent = JSON.parse(wsEvent.data);
                     var mwEventType = WebSocketMsgs.EventType[mwEvent.eventType];
                     if (mwEventType == 0 /* AnalyzerInfo */)
@@ -153,15 +155,14 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                 }
             };
         }
-        _Page.prototype.componentDidMount = function () {
+        Page.prototype.componentDidMount = function () {
             this.initSocket();
         };
-        _Page.prototype.render = function () {
+        Page.prototype.render = function () {
             return (R.div({ id: 'wrapper' }, Sidebar.Component(this.getSidebarProps()), MainContent.Component(this.getMainContentProps())));
         };
-        return _Page;
+        return Page;
     })(React.Component);
-    var Page = React.createFactory(_Page);
-    return Page;
+    exports.Component = React.createFactory(Page);
 });
 //# sourceMappingURL=Page.js.map

@@ -12,6 +12,10 @@ import MainContent = require('./MainContent');
 import FilterSidebar = require('./sidebar/filter/FilterSidebar');
 var R = React.DOM;
 
+export interface Props {
+    socket: WebSocket;
+}
+
 interface PageState {
     activeAnalyzerId: string;
     analyzers: {[id: string]: AnalyzerState};
@@ -27,7 +31,7 @@ interface AnalyzerState {
     unreadErrors: number;
 }
 
-class _Page extends React.Component<{}, PageState> {
+class Page extends React.Component<Props, PageState> {
     constructor(props) {
         super(props);
         this.state = {
@@ -58,8 +62,10 @@ class _Page extends React.Component<{}, PageState> {
     }
 
     private initSocket = (): void => {
-        var socket = new WebSocket("ws://127.0.0.1:8900");
-        socket.onmessage = (wsEvent: MessageEvent) => {
+        this.props.socket.onclose = (event) => {
+            alert('Connection to middleware was closed!');
+        };
+        this.props.socket.onmessage = (wsEvent: MessageEvent) => {
             var mwEvent:WebSocketMsgs.WebSocketMsg = JSON.parse(wsEvent.data);
             var mwEventType = WebSocketMsgs.EventType[mwEvent.eventType];
             if (mwEventType == WebSocketMsgs.EventType.AnalyzerInfo)
@@ -195,5 +201,4 @@ class _Page extends React.Component<{}, PageState> {
         );
     }
 }
-var Page = React.createFactory(_Page);
-export = Page;
+export var Component = React.createFactory(Page);

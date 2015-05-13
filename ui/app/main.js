@@ -3,8 +3,8 @@ require('./css/custom.css');
 var React = require('react');
 Object.assign = require('object-assign');
 
-var Page = require('./js/Page');
+var Main = require('./js/Main');
 
 initReact = function () {
-    React.render(Page(), document.getElementById('root'));
+    React.render(Main(), document.getElementById('root'));
 };
