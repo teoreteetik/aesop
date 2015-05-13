@@ -1,3 +1,4 @@
+/// <reference path="../types/common.d.ts" />
 import React = require('react');
 var R = React.DOM;
 import ConnectForm = require('./ConnectForm');
