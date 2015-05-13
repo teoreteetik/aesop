@@ -14,14 +14,15 @@ dependencies {
     testCompile 'com.typesafe.akka:akka-testkit_2.11:2.3.9'
     testCompile 'org.eclipse.jetty:jetty-server:9.2.3.v20140905'
     testCompile 'org.eclipse.jetty:jetty-servlet:9.2.3.v20140905'
+}
 
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'Gradle Jar File Example',
-                   'Main-Class': 'ee.lis.core.Main',
-                   'Class-Path': '.'
+        attributes 'Implementation-Title': 'middleware',
+                    'Main-Class': 'ee.lis.core.Main',
+                    'Class-Path': '.'
     }
-    baseName = project.name + '-all'
+    baseName = 'middleware'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude 'application.conf'
     with jar
