@@ -41,4 +41,20 @@ public class Field implements HasStringRepresentation {
             "rawData='" + rawData + '\'' +
             '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Field field = (Field) o;
+
+        return rawData.equals(field.rawData);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return rawData.hashCode();
+    }
 }

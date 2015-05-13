@@ -48,4 +48,23 @@ public class DelimitedData<T extends HasStringRepresentation> {
             ", fields=" + fields +
             '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DelimitedData<?> that = (DelimitedData<?>) o;
+
+        if (!delimiter.equals(that.delimiter)) return false;
+        return fields.equals(that.fields);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = delimiter.hashCode();
+        result = 31 * result + fields.hashCode();
+        return result;
+    }
 }

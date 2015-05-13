@@ -26,4 +26,20 @@ public abstract class LIS2A2Msg {
     public String asString() {
         return records.stream().map(LIS2A2Record::asString).collect(joining());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LIS2A2Msg lis2A2Msg = (LIS2A2Msg) o;
+
+        return records.equals(lis2A2Msg.records);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return records.hashCode();
+    }
 }

@@ -55,46 +55,46 @@ public abstract class LIS2A2Record {
         return data.asString() + CR;
     }
 
-    protected LIS2A2Record setField(int fieldIndex, Field field) {
+    public LIS2A2Record setField(int fieldIndex, Field field) {
         return getNew(data.setField(fieldIndex - 1, field));
     }
 
-    protected LIS2A2Record setField(int fieldIndex, String value) {
-        Field newField = new PrimitiveField(value);
+    public LIS2A2Record setField(int fieldIndex, String value) {
+        Field newField = new Field(value);
         return setField(fieldIndex, newField);
     }
 
-    protected LIS2A2Record setComponent(int fieldIndex, int componentIndex, Field value) {
+    public LIS2A2Record setComponent(int fieldIndex, int componentIndex, Field value) {
         Field oldField = data.get(fieldIndex - 1);
         CompomentField newField = oldField == null ? new CompomentField().setComponent(componentIndex, value)
             : ((CompomentField) oldField).setComponent(componentIndex, value);
         return getNew(data.setField(fieldIndex - 1, newField));
     }
 
-    protected LIS2A2Record setComponent(int fieldIndex, int componentIndex, String value) {
+    public LIS2A2Record setComponent(int fieldIndex, int componentIndex, String value) {
         return setComponent(fieldIndex, componentIndex, new PrimitiveField(value));
     }
 
-    protected LIS2A2Record addRepeat(int fieldIndex, Field value) {
+    public LIS2A2Record addRepeat(int fieldIndex, Field value) {
         Field oldField = data.get(fieldIndex - 1);
         RepeatField newField = oldField == null ? new RepeatField().addRepeat(value)
             : ((RepeatField) oldField).addRepeat(value);
         return getNew(data.setField(fieldIndex - 1, newField));
     }
 
-    protected LIS2A2Record addRepeat(int fieldIndex, String value) {
+    public LIS2A2Record addRepeat(int fieldIndex, String value) {
         return addRepeat(fieldIndex, new PrimitiveField(value));
     }
 
-    protected String getFieldValue(int fieldIndex) {
+    public String getFieldValue(int fieldIndex) {
         return data.get(fieldIndex - 1).toPrimitiveField().asString();
     }
 
-    protected String getComponentValue(int fieldIndex, int componentIndex) {
+    public String getComponentValue(int fieldIndex, int componentIndex) {
         return data.get(fieldIndex - 1).toComponentField().getComponent(componentIndex);
     }
 
-    protected List<Field> getRepeats(int fieldIndex) {
+    public List<Field> getRepeats(int fieldIndex) {
         return data.get(fieldIndex - 1).asRepeatField().getRepeats();
     }
 
