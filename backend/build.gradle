@@ -1,6 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'application'
-mainClassName = 'ee.lis.core.Main'
 
 version = '1.0'
 
@@ -16,16 +14,15 @@ dependencies {
     testCompile 'com.typesafe.akka:akka-testkit_2.11:2.3.9'
     testCompile 'org.eclipse.jetty:jetty-server:9.2.3.v20140905'
     testCompile 'org.eclipse.jetty:jetty-servlet:9.2.3.v20140905'
-}
 
-buildscript {
-    repositories {
-        jcenter()
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                   'Main-Class': 'ee.lis.core.Main',
+                   'Class-Path': '.'
     }
-
-    dependencies {
-        classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
-    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'application.conf'
+    with jar
 }
-
-apply plugin: 'eu.appsatori.fatjar'
