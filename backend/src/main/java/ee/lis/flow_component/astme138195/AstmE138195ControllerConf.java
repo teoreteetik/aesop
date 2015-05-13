@@ -9,13 +9,13 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
-public class AstmE138195ActorConf implements ConfMsg {
+public class AstmE138195ControllerConf implements ConfMsg {
 
     public final int maxFrameSize;
     public final ActorRef lowLevelRecipient;
     public final ActorRef highLevelRecipient;
 
-    public AstmE138195ActorConf(int maxFrameSize, ActorRef lowLevelRecipient, ActorRef highLevelRecipient) {
+    public AstmE138195ControllerConf(int maxFrameSize, ActorRef lowLevelRecipient, ActorRef highLevelRecipient) {
         this.maxFrameSize = maxFrameSize;
         this.lowLevelRecipient = lowLevelRecipient;
         this.highLevelRecipient = highLevelRecipient;
@@ -23,7 +23,7 @@ public class AstmE138195ActorConf implements ConfMsg {
 
     @Override
     public String toString() {
-        return "AstmE138195ActorConf{" +
+        return "AstmE138195ControllerConf{" +
             "maxFrameSize=" + maxFrameSize +
             ", lowLevelRecipient=" + lowLevelRecipient +
             ", highLevelRecipient=" + highLevelRecipient +
@@ -36,7 +36,7 @@ public class AstmE138195ActorConf implements ConfMsg {
         highLevelRecipient
     }
 
-    public static AstmE138195ActorConf create(Config config, ActorContext ctx) {
+    public static AstmE138195ControllerConf create(Config config, ActorContext ctx) {
         int maxFrameSize = config.getInt(ConfKey.maxFrameSize.name());
         ActorRef lowLevelRecipient;
         ActorRef highLevelRecipient;
@@ -48,6 +48,6 @@ public class AstmE138195ActorConf implements ConfMsg {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return new AstmE138195ActorConf(maxFrameSize, lowLevelRecipient, highLevelRecipient);
+        return new AstmE138195ControllerConf(maxFrameSize, lowLevelRecipient, highLevelRecipient);
     }
 }

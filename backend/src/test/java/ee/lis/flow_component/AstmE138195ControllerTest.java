@@ -7,8 +7,8 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.typesafe.config.ConfigFactory;
-import ee.lis.flow_component.astme138195.AstmE138195Actor;
-import ee.lis.flow_component.astme138195.AstmE138195ActorConf;
+import ee.lis.flow_component.astme138195.AstmE138195Controller;
+import ee.lis.flow_component.astme138195.AstmE138195ControllerConf;
 import ee.lis.flow_component.socket.SocketProtocol.BytesMessage;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -47,8 +47,8 @@ public class AstmE138195ControllerTest {
             lowlevelProbe = new JavaTestKit(system);
             highlevelProbe = new JavaTestKit(system);
 
-            astmE138195Controller = system.actorOf(Props.create(AstmE138195Actor.class));
-            astmE138195Controller.tell(new AstmE138195ActorConf(240, lowlevelProbe.getRef(), highlevelProbe.getRef()), noSender());
+            astmE138195Controller = system.actorOf(Props.create(AstmE138195Controller.class));
+            astmE138195Controller.tell(new AstmE138195ControllerConf(240, lowlevelProbe.getRef(), highlevelProbe.getRef()), noSender());
             actorPair = new ActorPair(astmE138195Controller, lowlevelProbe);
 
             for (int i = 0; i < 4; i++) {

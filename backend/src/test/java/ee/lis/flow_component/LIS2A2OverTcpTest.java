@@ -10,7 +10,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
 import ee.lis.driver.DynamicDriver;
-import ee.lis.mock.MockLIS;
+import ee.lis.mock.MockMyLab;
 import ee.lis.mock.MockSocketAnalyzer;
 import ee.lis.mock.MockSocketAnalyzer.Mode;
 import java.text.SimpleDateFormat;
@@ -19,19 +19,19 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class LIS2A2OverTcpTest {
+public class LIS2A2OverTCPTest {
     private static ActorSystem system;
     private static MockSocketAnalyzer mockAnalyzer;
-    private static MockLIS mockLIS;
+    private static MockMyLab mockMyLab;
 
     @BeforeClass
     public static void setup() {
         system = ActorSystem.create("testSystem");
         mockAnalyzer = new MockSocketAnalyzer(system, "127.0.0.1", 50_000, Mode.CLIENT);
-        mockLIS = new MockLIS(system, "127.0.0.1", 8070);
+        mockMyLab = new MockMyLab(system, "127.0.0.1", 8070);
 
         ActorRef lis2a2OverTcpDriver = system.actorOf(Props.create(DynamicDriver.class), "lis2a2OverTcpDriver");
-        Config config = ConfigFactory.load().getConfig("Drivers.AstmOverTcp")
+        Config config = ConfigFactory.load().getConfig("Drivers.LIS2A2OverTCP")
             .withValue("SocketServer.address", ConfigValueFactory.fromAnyRef("127.0.0.1"))
             .withValue("SocketServer.port", ConfigValueFactory.fromAnyRef(50_000))
             .withValue("MyLabHttpClient.queryUrl", ConfigValueFactory.fromAnyRef("http://localhost:8070/query"))
@@ -65,7 +65,7 @@ public class LIS2A2OverTcpTest {
             .send("<EOT>")
             .expectNoMsg();
 
-        mockLIS.expect(
+        mockMyLab.expect(
             MyLabResultMsg(
                 Order(
                     Patient("John", "Smith", "52483291"),
@@ -96,7 +96,7 @@ public class LIS2A2OverTcpTest {
             .send("<EOT>")
             .expectNoMsg();
 
-        mockLIS
+        mockMyLab
             .expect(
                 MyLabQueryMsg(asList("SpecimenID1", "SpecimenID2"),
                     asList("ALL")))

@@ -6,8 +6,8 @@ import ee.lis.core.ConfMsg;
 import ee.lis.core.RecipientConf;
 import ee.lis.flow_component.astm_to_mylis.LIS2A2ToMyLabConverter;
 import ee.lis.flow_component.astm_to_string.LIS2A2ToStringConverter;
-import ee.lis.flow_component.astme138195.AstmE138195Actor;
-import ee.lis.flow_component.astme138195.AstmE138195ActorConf;
+import ee.lis.flow_component.astme138195.AstmE138195Controller;
+import ee.lis.flow_component.astme138195.AstmE138195ControllerConf;
 import ee.lis.flow_component.astm_to_mylis.MyLabToLIS2A2Converter;
 import ee.lis.flow_component.astm_to_string.StringToLIS2A2Converter;
 import ee.lis.flow_component.mylab_http.MyLabHttpClientConf;
@@ -23,7 +23,7 @@ public enum ComponentType {
 
     SocketClient(SocketClient.class, SocketClientConf::create),
     SocketServer(SocketServer.class, SocketServerConf::create),
-    AstmE138195Actor(AstmE138195Actor.class, AstmE138195ActorConf::create),
+    AstmE138195Controller(AstmE138195Controller.class, AstmE138195ControllerConf::create),
     LIS2A2ToMyLabConverter(LIS2A2ToMyLabConverter.class, RecipientConf::create),
     MyLabToLIS2A2Converter(MyLabToLIS2A2Converter.class, RecipientConf::create),
     LIS2A2ToStringConverter(LIS2A2ToStringConverter.class, RecipientConf::create),

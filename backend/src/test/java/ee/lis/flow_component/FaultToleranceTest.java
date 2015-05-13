@@ -10,7 +10,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import ee.lis.core.Master;
 import ee.lis.interfaces.MyLabMessages.MyLabOrderMsg;
-import ee.lis.mock.MockLIS;
+import ee.lis.mock.MockMyLab;
 import ee.lis.mock.MockSocketAnalyzer;
 import ee.lis.mock.MockSocketAnalyzer.Mode;
 import ee.lis.util.JsonUtil;
@@ -50,8 +50,8 @@ public class FaultToleranceTest {
         private static MockSocketAnalyzer mockAnalyzer2;
         private static MockSocketAnalyzer mockAnalyzer3;
 
-        private static MockLIS mockLIS;
-        private static MockLIS faultyLIS;
+        private static MockMyLab mockMyLab;
+        private static MockMyLab faultyLIS;
 
         private static String resultJson;
         private static String queryJson;
@@ -85,10 +85,10 @@ public class FaultToleranceTest {
                     asList("ALL"))
             );
 
-            mockLIS = new MockLIS(system, "127.0.0.1", 8070);
-            faultyLIS = new MockLIS(system, "127.0.0.1", 8071);
+            mockMyLab = new MockMyLab(system, "127.0.0.1", 8070);
+            faultyLIS = new MockMyLab(system, "127.0.0.1", 8071);
 
-            Config analyzerConfig = ConfigFactory.parseResources("driverDefinitions/LIS2A2OverTcp.conf")
+            Config analyzerConfig = ConfigFactory.parseResources("driverDefinitions/LIS2A2OverTCP.conf")
                 .withValue("MyLabHttpClient.resultUrl", fromAnyRef("http://localhost:8070/result"))
                 .withValue("MyLabHttpClient.queryUrl", fromAnyRef("http://localhost:8070/query"))
                 .withValue("SocketServer.address", fromAnyRef("127.0.0.1"));
@@ -180,12 +180,12 @@ public class FaultToleranceTest {
             );
 
             while (!lisExpectedMsgs.isEmpty()) {
-                String receivedMsg = mockLIS.expectAnyString();
+                String receivedMsg = mockMyLab.expectAnyString();
                 lisExpectedMsgs.remove(receivedMsg);
                 if (receivedMsg.equals(resultJson))
-                    mockLIS.send("");
+                    mockMyLab.send("");
                 else if (receivedMsg.equals(queryJson))
-                    mockLIS.send(orderMsg);
+                    mockMyLab.send(orderMsg);
             }
         }
 

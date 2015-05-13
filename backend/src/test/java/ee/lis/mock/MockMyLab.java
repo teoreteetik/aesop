@@ -12,17 +12,17 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import scala.concurrent.duration.FiniteDuration;
 
-public class MockLIS {
+public class MockMyLab {
     private final ActorRef mockLIS;
     private final JavaTestKit httpProbe;
 
-    public MockLIS(ActorSystem system, String address, int port) {
+    public MockMyLab(ActorSystem system, String address, int port) {
         mockLIS = system.actorOf(Props.create(HttpServer.class));
         httpProbe = new JavaTestKit(system);
         mockLIS.tell(new HttpServerConf(address, port, httpProbe.getRef()), ActorRef.noSender());
     }
 
-    public MockLIS expect(MyLabResultMsg expectedResultMsg) {
+    public MockMyLab expect(MyLabResultMsg expectedResultMsg) {
         String actual = httpProbe.expectMsgClass(String.class);
         String expected = JsonUtil.asJson(expectedResultMsg);
         Assert.assertEquals(expected, actual);
@@ -30,19 +30,19 @@ public class MockLIS {
         return this;
     }
 
-    public MockLIS expect(MyLabQueryMsg expectedQueryMsg) {
+    public MockMyLab expect(MyLabQueryMsg expectedQueryMsg) {
         String actual = httpProbe.expectMsgClass(String.class);
         String expected = JsonUtil.asJson(expectedQueryMsg);
         Assert.assertEquals(expected, actual);
         return this;
     }
 
-    public MockLIS send(MyLabOrderMsg orderMsg) {
+    public MockMyLab send(MyLabOrderMsg orderMsg) {
         httpProbe.getLastSender().tell(JsonUtil.asJson(orderMsg), httpProbe.getRef());
         return this;
     }
 
-    public MockLIS send(String str) {
+    public MockMyLab send(String str) {
         httpProbe.getLastSender().tell(str, httpProbe.getRef());
         return this;
     }

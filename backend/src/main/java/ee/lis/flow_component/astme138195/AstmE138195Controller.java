@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 import scala.PartialFunction;
 import scala.runtime.BoxedUnit;
 
-public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
+public class AstmE138195Controller extends FlowComponent<AstmE138195ControllerConf> {
 
     private PartialFunction<Object, BoxedUnit> idleState;
     private PartialFunction<Object, BoxedUnit> receivingState;
@@ -27,7 +27,7 @@ public class AstmE138195Actor extends FlowComponent<AstmE138195ActorConf> {
         return idleState;
     }
 
-    private AstmE138195Actor() {
+    private AstmE138195Controller() {
         idleState = getIdleState();
         receivingState = getReceivingState();
         sendingState = getSendingState();
