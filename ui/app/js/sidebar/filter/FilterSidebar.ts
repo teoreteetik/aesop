@@ -16,6 +16,7 @@ export interface Props {
     uniqueSenderIdNames: IdName[];
     uniqueRecipientIdNames: IdName[];
     onFilterStateChanged: (filterState:FilterState) => void;
+    unreadErrors: number;
 }
 
 class FilterSidebar extends React.Component<Props, {}> {
@@ -29,7 +30,8 @@ class FilterSidebar extends React.Component<Props, {}> {
                     msgProcessedFilterState: newState,
                     logEventFilterState: this.props.filterState.logEventFilterState
                 });
-            }
+            },
+            unreadErrors: this.props.unreadErrors
         };
     };
     private getLogEventFilterProps = (): LogEventFilter.Props => {

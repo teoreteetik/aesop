@@ -15,7 +15,7 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
             this.initSocket = function () {
                 var socket = new WebSocket("ws://127.0.0.1:8900");
                 socket.onmessage = function (wsEvent) {
-                    var mwEvent = JSON.parse(event.data);
+                    var mwEvent = JSON.parse(wsEvent.data);
                     var mwEventType = WebSocketMsgs.EventType[mwEvent.eventType];
                     if (mwEventType == 0 /* AnalyzerInfo */)
                         _this.handleAnalyzerInfoEvent(mwEvent.event);
@@ -34,7 +34,8 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                     msgProcessedRows: [],
                     logEventRows: [],
                     uniqueSenderNameById: {},
-                    uniqueRecipientNameById: {}
+                    uniqueRecipientNameById: {},
+                    unreadErrors: 0
                 };
                 _this.state.analyzers[analyzerState.idName.id] = analyzerState;
                 if (!_this.state.activeAnalyzerId)
@@ -65,7 +66,7 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                     analyzerState.uniqueSenderNameById[msg.senderComponentId] = FormatUtil.getComponentName(msg.senderComponentId, analyzerState.componentIdNames);
                     analyzerState.msgProcessedRows.push(_this.msgProcessedToRow(msg));
                     if (msg.stackTrace)
-                        _this.state.filterState.msgProcessedFilterState.numOfNewFailedMsgs++;
+                        analyzerState.unreadErrors++;
                     _this.setState(_this.state);
                 }
             };
@@ -91,7 +92,8 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                         idName: analyzer.idName,
                         componentIdNames: analyzer.componentIdNames,
                         uniqueSenderIdNames: uniqueSenderIdNames,
-                        uniqueRecipientIdNames: uniqueRecipientIdNames
+                        uniqueRecipientIdNames: uniqueRecipientIdNames,
+                        unreadErrors: analyzer.unreadErrors
                     });
                 });
                 return {
@@ -121,7 +123,7 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                         if (!row.isRead) {
                             row.isRead = true;
                             if (row.original.stackTrace) {
-                                _this.state.filterState.msgProcessedFilterState.numOfNewFailedMsgs--;
+                                _this.state.analyzers[_this.state.activeAnalyzerId].unreadErrors--;
                             }
                             _this.setState(_this.state);
                         }
@@ -141,8 +143,7 @@ define(["require", "exports", 'react', 'lodash', './WebSocketMsgs', './sidebar/S
                         startTime: undefined,
                         endTime: undefined,
                         searchText: undefined,
-                        processingState: undefined,
-                        numOfNewFailedMsgs: 0
+                        processingState: undefined
                     },
                     logEventFilterState: {
                         startTime: undefined,

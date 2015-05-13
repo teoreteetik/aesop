@@ -2,6 +2,8 @@
 
 import React = require('react');
 import IdName = require('../util/IdName');
+var BS = require('react-bootstrap');
+var Label = React.createFactory(BS.Label);
 var R = React.DOM;
 
 export interface Props {
@@ -13,6 +15,7 @@ export interface Props {
 export interface AnalyzerInfo {
     idName: IdName;
     componentIdNames: IdName[];
+    unreadErrors: number;
 }
 
 class AnalyzersList extends React.Component<Props, {}> {
@@ -26,7 +29,7 @@ class AnalyzersList extends React.Component<Props, {}> {
             return (
                 R.li({},
                     R.a({ href: '#', onClick: clickHandler },
-                        analyzer.idName.name),
+                        analyzer.idName.name + ' ', Label({bsStyle:'danger'}, analyzer.unreadErrors === 0 ? '' : analyzer.unreadErrors)),
                         R.ul({ className: this.props.activeAnalyzerId == analyzer.idName.id ? null : 'collapse' },
                             components))
             );

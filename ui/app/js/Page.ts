@@ -24,6 +24,7 @@ interface AnalyzerState {
     logEventRows: LogEventsTable.Row[];
     uniqueSenderNameById: {[id: string]: string};
     uniqueRecipientNameById: {[id: string]: string};
+    unreadErrors: number;
 }
 
 class _Page extends React.Component<{}, PageState> {
@@ -42,8 +43,7 @@ class _Page extends React.Component<{}, PageState> {
                     startTime: undefined,
                     endTime: undefined,
                     searchText: undefined,
-                    processingState: undefined,
-                    numOfNewFailedMsgs: 0
+                    processingState: undefined
                 },
                 logEventFilterState: {
                     startTime: undefined,
@@ -60,7 +60,7 @@ class _Page extends React.Component<{}, PageState> {
     private initSocket = (): void => {
         var socket = new WebSocket("ws://127.0.0.1:8900");
         socket.onmessage = (wsEvent: MessageEvent) => {
-            var mwEvent:WebSocketMsgs.WebSocketMsg = JSON.parse(event.data);
+            var mwEvent:WebSocketMsgs.WebSocketMsg = JSON.parse(wsEvent.data);
             var mwEventType = WebSocketMsgs.EventType[mwEvent.eventType];
             if (mwEventType == WebSocketMsgs.EventType.AnalyzerInfo)
                 this.handleAnalyzerInfoEvent(<WebSocketMsgs.AnalyzerInfo>mwEvent.event);
@@ -81,7 +81,8 @@ class _Page extends React.Component<{}, PageState> {
             msgProcessedRows: [],
             logEventRows: [],
             uniqueSenderNameById: {},
-            uniqueRecipientNameById: {}
+            uniqueRecipientNameById: {},
+            unreadErrors: 0
         };
         this.state.analyzers[analyzerState.idName.id] = analyzerState;
         if (!this.state.activeAnalyzerId)
@@ -115,7 +116,7 @@ class _Page extends React.Component<{}, PageState> {
             analyzerState.uniqueSenderNameById[msg.senderComponentId] = FormatUtil.getComponentName(msg.senderComponentId, analyzerState.componentIdNames);
             analyzerState.msgProcessedRows.push(this.msgProcessedToRow(msg));
             if (msg.stackTrace)
-                this.state.filterState.msgProcessedFilterState.numOfNewFailedMsgs++;
+                analyzerState.unreadErrors++;
             this.setState(this.state);
         }
     };
@@ -145,7 +146,8 @@ class _Page extends React.Component<{}, PageState> {
                 idName: analyzer.idName,
                 componentIdNames: analyzer.componentIdNames,
                 uniqueSenderIdNames: uniqueSenderIdNames,
-                uniqueRecipientIdNames: uniqueRecipientIdNames
+                uniqueRecipientIdNames: uniqueRecipientIdNames,
+                unreadErrors: analyzer.unreadErrors
             });
         });
 
@@ -176,8 +178,8 @@ class _Page extends React.Component<{}, PageState> {
             markRowAsRead: (row: ProcessedMsgsTable.Row) => {
                 if (!row.isRead) {
                     row.isRead = true;
-                    if (row.original.stackTrace){
-                        this.state.filterState.msgProcessedFilterState.numOfNewFailedMsgs--;
+                    if (row.original.stackTrace) {
+                        this.state.analyzers[this.state.activeAnalyzerId].unreadErrors--;
                     }
                     this.setState(this.state);
                 }

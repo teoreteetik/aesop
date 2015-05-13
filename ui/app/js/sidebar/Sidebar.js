@@ -24,7 +24,11 @@ define(["require", "exports", 'react', './AnalyzersList', './filter/FilterSideba
                 var analyzersListProps = {
                     activeAnalyzerId: _this.props.activeAnalyzerId,
                     analyzers: _this.props.analyzers.map(function (a) {
-                        return { idName: a.idName, componentIdNames: a.componentIdNames };
+                        return {
+                            idName: a.idName,
+                            componentIdNames: a.componentIdNames,
+                            unreadErrors: a.unreadErrors
+                        };
                     }),
                     onAnalyzerClicked: _this.props.onAnalyzerClicked
                 };
@@ -36,7 +40,8 @@ define(["require", "exports", 'react', './AnalyzersList', './filter/FilterSideba
                     uniqueSenderIdNames: analyzerState.uniqueSenderIdNames,
                     uniqueRecipientIdNames: analyzerState.uniqueRecipientIdNames,
                     filterState: _this.props.filterState,
-                    onFilterStateChanged: _this.props.onFilterStateChanged
+                    onFilterStateChanged: _this.props.onFilterStateChanged,
+                    unreadErrors: analyzerState.unreadErrors
                 };
                 return FilterSidebar.Component(filterProps);
             };

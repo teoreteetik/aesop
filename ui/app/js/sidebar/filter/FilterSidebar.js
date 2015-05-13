@@ -22,7 +22,8 @@ define(["require", "exports", 'react', './MsgProcessedFilter', './LogEventFilter
                             msgProcessedFilterState: newState,
                             logEventFilterState: _this.props.filterState.logEventFilterState
                         });
-                    }
+                    },
+                    unreadErrors: _this.props.unreadErrors
                 };
             };
             this.getLogEventFilterProps = function () {

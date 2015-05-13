@@ -6,6 +6,8 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 define(["require", "exports", 'react'], function (require, exports, React) {
+    var BS = require('react-bootstrap');
+    var Label = React.createFactory(BS.Label);
     var R = React.DOM;
     var AnalyzersList = (function (_super) {
         __extends(AnalyzersList, _super);
@@ -18,7 +20,7 @@ define(["require", "exports", 'react'], function (require, exports, React) {
                     _this.props.onAnalyzerClicked(analyzer.idName.id);
                 };
                 var components = analyzer.componentIdNames.map(function (idName) { return R.li({}, R.a({ href: '#' }, idName.name)); });
-                return (R.li({}, R.a({ href: '#', onClick: clickHandler }, analyzer.idName.name), R.ul({ className: _this.props.activeAnalyzerId == analyzer.idName.id ? null : 'collapse' }, components)));
+                return (R.li({}, R.a({ href: '#', onClick: clickHandler }, analyzer.idName.name + ' ', Label({ bsStyle: 'danger' }, analyzer.unreadErrors === 0 ? '' : analyzer.unreadErrors)), R.ul({ className: _this.props.activeAnalyzerId == analyzer.idName.id ? null : 'collapse' }, components)));
             })); };
         }
         AnalyzersList.prototype.render = function () {

@@ -16,7 +16,6 @@ export interface FilterState {
     endTime: number;
     searchText: string;
     processingState: ProcessingState;
-    numOfNewFailedMsgs: number;
 }
 
 export enum ProcessingState {
@@ -31,6 +30,7 @@ export interface Pair {
 
 export interface Props {
     filterState: FilterState;
+    unreadErrors: number;
     uniqueSenderIdNames: IdName[];
     uniqueRecipientIdNames: IdName[];
     onFilterStateChanged: (filterState:FilterState) => void;
@@ -84,7 +84,7 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
     private getProcessingStateDropdown = () => {
         var options = [R.option({ value: '' }, ''),
                        R.option({ value: ProcessingState[ProcessingState.SUCCESS]}, 'Successful'),
-                       R.option({ value: ProcessingState[ProcessingState.FAIL]}, `Failed (${this.props.filterState.numOfNewFailedMsgs} new)`)];
+                       R.option({ value: ProcessingState[ProcessingState.FAIL]}, `Failed (${this.props.unreadErrors} new)`)];
         return (
             Input({
                 type: 'select',

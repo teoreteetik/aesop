@@ -22,6 +22,7 @@ export interface AnalyzerState {
     componentIdNames: IdName[];
     uniqueSenderIdNames: IdName[];
     uniqueRecipientIdNames: IdName[];
+    unreadErrors: number;
 }
 
 enum CurrentView {
@@ -44,7 +45,11 @@ class Sidebar extends React.Component<Props, State> {
         var analyzersListProps: AnalyzersList.Props = {
             activeAnalyzerId: this.props.activeAnalyzerId,
             analyzers: this.props.analyzers.map(a => {
-                return {idName: a.idName, componentIdNames: a.componentIdNames}
+                return {
+                    idName: a.idName,
+                    componentIdNames: a.componentIdNames,
+                    unreadErrors: a.unreadErrors
+                }
             }),
             onAnalyzerClicked: this.props.onAnalyzerClicked
         };
@@ -57,7 +62,8 @@ class Sidebar extends React.Component<Props, State> {
             uniqueSenderIdNames: analyzerState.uniqueSenderIdNames,
             uniqueRecipientIdNames: analyzerState.uniqueRecipientIdNames,
             filterState: this.props.filterState,
-            onFilterStateChanged: this.props.onFilterStateChanged
+            onFilterStateChanged: this.props.onFilterStateChanged,
+            unreadErrors: analyzerState.unreadErrors
         };
         return FilterSidebar.Component(filterProps);
     };
