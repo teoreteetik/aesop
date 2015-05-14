@@ -1,9 +1,9 @@
-package ee.lis.interfaces.astm.msg;
+package ee.lis.interfaces.lis2a2.msg;
 
-import ee.lis.interfaces.astm.record.LIS2A2Record;
-import ee.lis.interfaces.astm.record.O;
-import ee.lis.interfaces.astm.record.P;
-import ee.lis.interfaces.astm.record.R;
+import ee.lis.interfaces.lis2a2.record.LIS2A2Record;
+import ee.lis.interfaces.lis2a2.record.O;
+import ee.lis.interfaces.lis2a2.record.P;
+import ee.lis.interfaces.lis2a2.record.R;
 import java.util.List;
 import java.util.stream.Collectors;
 

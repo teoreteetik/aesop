@@ -1,4 +1,4 @@
-package ee.lis.interfaces.astm;
+package ee.lis.interfaces.lis2a2;
 
 import static java.util.Collections.max;
 import static java.util.Collections.unmodifiableMap;

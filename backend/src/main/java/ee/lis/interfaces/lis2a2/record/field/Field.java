@@ -1,6 +1,6 @@
-package ee.lis.interfaces.astm.record.field;
+package ee.lis.interfaces.lis2a2.record.field;
 
-import ee.lis.interfaces.astm.HasStringRepresentation;
+import ee.lis.interfaces.lis2a2.HasStringRepresentation;
 import java.util.regex.Pattern;
 
 public class Field implements HasStringRepresentation {

@@ -1,11 +1,11 @@
-package ee.lis.interfaces.astm.record;
+package ee.lis.interfaces.lis2a2.record;
 
 import static ee.lis.util.LowLevelUtils.CR;
-import ee.lis.interfaces.astm.DelimitedData;
-import ee.lis.interfaces.astm.record.field.CompomentField;
-import ee.lis.interfaces.astm.record.field.Field;
-import ee.lis.interfaces.astm.record.field.PrimitiveField;
-import ee.lis.interfaces.astm.record.field.RepeatField;
+import ee.lis.interfaces.lis2a2.DelimitedData;
+import ee.lis.interfaces.lis2a2.record.field.CompomentField;
+import ee.lis.interfaces.lis2a2.record.field.Field;
+import ee.lis.interfaces.lis2a2.record.field.PrimitiveField;
+import ee.lis.interfaces.lis2a2.record.field.RepeatField;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

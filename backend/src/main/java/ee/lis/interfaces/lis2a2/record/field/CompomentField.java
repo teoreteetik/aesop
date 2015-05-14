@@ -1,6 +1,6 @@
-package ee.lis.interfaces.astm.record.field;
+package ee.lis.interfaces.lis2a2.record.field;
 
-import ee.lis.interfaces.astm.DelimitedData;
+import ee.lis.interfaces.lis2a2.DelimitedData;
 
 public class CompomentField extends Field {
     private final DelimitedData<Field> data;

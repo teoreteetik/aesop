@@ -1,4 +1,4 @@
-package ee.lis.interfaces.astm.record.field;
+package ee.lis.interfaces.lis2a2.record.field;
 
 public class PrimitiveField extends Field {
     private final String data;

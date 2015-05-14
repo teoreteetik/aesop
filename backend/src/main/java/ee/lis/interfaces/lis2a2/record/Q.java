@@ -1,8 +1,8 @@
-package ee.lis.interfaces.astm.record;
+package ee.lis.interfaces.lis2a2.record;
 
 import static java.util.stream.Collectors.toList;
-import ee.lis.interfaces.astm.DelimitedData;
-import ee.lis.interfaces.astm.record.field.Field;
+import ee.lis.interfaces.lis2a2.DelimitedData;
+import ee.lis.interfaces.lis2a2.record.field.Field;
 import java.util.List;
 
 public class Q extends LIS2A2Record {
