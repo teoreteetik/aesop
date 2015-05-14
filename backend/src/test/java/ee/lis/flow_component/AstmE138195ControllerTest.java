@@ -43,7 +43,7 @@ public class AstmE138195ControllerTest {
 
         @BeforeClass
         public static void setup() {
-            system = ActorSystem.create("testSystem", ConfigFactory.parseString("akka.loglevel = OFF"));
+            system = ActorSystem.create("testSystem");//, ConfigFactory.parseString("akka.loglevel = OFF"));
             lowlevelProbe = new JavaTestKit(system);
             highlevelProbe = new JavaTestKit(system);
 

@@ -10,8 +10,6 @@ import ee.lis.core.RecipientConf;
 import ee.lis.flow_component.astm_to_string.StringToLIS2A2Converter;
 import ee.lis.interfaces.astm.msg.LIS2A2ResultMsg;
 import ee.lis.interfaces.astm.record.*;
-import ee.lis.interfaces.astm.record.field.Field;
-import ee.lis.interfaces.astm.record.field.PrimitiveField;
 import java.util.ArrayList;
 import org.junit.AfterClass;
 import org.junit.Assert;
