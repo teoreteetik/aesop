@@ -8,13 +8,16 @@ import LogEventFilter = require('./sidebar/filter/LogEventFilter');
 import MsgDetailsPane = require('./MsgDetailsPane');
 var R = React.DOM;
 
-export interface Props {
-    msgProcessedRows: ProcessedMsgsTable.Row[];
-    logEventRows: LogEventsTable.Row[];
-    filterState: FilterSidebar.FilterState;
-    onLogFilterStateChanged: (newState: LogEventFilter.FilterState) => void;
-    markRowAsRead: (row: ProcessedMsgsTable.Row) => void;
+module MainContent {
+    export interface Props {
+        msgProcessedRows: ProcessedMsgsTable.Row[];
+        logEventRows: LogEventsTable.Row[];
+        filterState: FilterSidebar.FilterState;
+        onLogFilterStateChanged: (newState: LogEventFilter.FilterState) => void;
+        markRowAsRead: (row: ProcessedMsgsTable.Row) => void;
+    }
 }
+
 
 interface State {
     tableWidth: number;
@@ -25,7 +28,7 @@ interface State {
     msgDetails: ProcessedMsgsTable.Row;
 }
 
-class MainContent extends React.Component<Props, State> {
+class MainContent extends React.Component<MainContent.Props, State> {
     constructor(props) {
         super(props);
         this.state = {
@@ -71,64 +74,68 @@ class MainContent extends React.Component<Props, State> {
                                                             : this.getProcessedMsgsTable();
 
     private getMsgDetailsPane = () => {
-        return (
-            MsgDetailsPane.Component({
-                row: this.state.msgDetails,
-                height: this.state.msgProcessedTableHeight,
-                onBackClicked: () => {
-                    this.props.onLogFilterStateChanged({
-                        startTime: undefined,
-                        endTime: undefined,
-                        componentId: undefined
-                    });
-                    this.state.msgDetails = undefined;
-                    this.setState(this.state);
-                }
+        var onBackClicked = () => {
+            this.props.onLogFilterStateChanged({
+                startTime: undefined,
+                endTime: undefined,
+                componentId: undefined
             })
-        );
+            this.state.msgDetails = undefined;
+            this.setState(this.state);
+        };
+        return React.jsx(`
+            <MsgDetailsPane row={this.state.msgDetails}
+                            height={this.state.msgProcessedTableHeight}
+                            onBackClicked={onBackClicked}/>
+        `);
     };
 
     private getProcessedMsgsTable = () => {
-        return (
-            ProcessedMsgsTable.Component({
-                rows: this.props.msgProcessedRows,
-                tableWidth: this.state.tableWidth,
-                tableHeight: this.state.msgProcessedTableHeight,
-                filterState: this.props.filterState.msgProcessedFilterState,
-                scrollTop: this.state.msgProcessedTableScrollTop,
-                onScrollChanged: (scrollTop) => {
-                    this.state.msgProcessedTableScrollTop = scrollTop;
-                    this.setState(this.state);
-                },
-                onRowDoubleClicked: (row:ProcessedMsgsTable.Row) => {
-                    this.state.msgDetails = row;
-                    this.setState(this.state);
-                    this.props.markRowAsRead(row);
-                    this.props.onLogFilterStateChanged({
-                        startTime: row.original.processingStartTime,
-                        endTime: row.original.processingEndTime,
-                        componentId: row.original.recipientComponentId
-                    });
-                }
-            })
-        );
+        var Facto = React.createFactory(ProcessedMsgsTable);
+        var scrollChanged =  (scrollTop) => {
+            this.state.msgProcessedTableScrollTop = scrollTop;
+            this.setState(this.state);
+        };
+        var onRowDoubleClicked = (row:ProcessedMsgsTable.Row) => {
+            this.state.msgDetails = row;
+            this.setState(this.state);
+            this.props.markRowAsRead(row);
+            this.props.onLogFilterStateChanged({
+                startTime: row.original.processingStartTime,
+                endTime: row.original.processingEndTime,
+                componentId: row.original.recipientComponentId
+            });
+        };
+        return (React.jsx(`
+            <ProcessedMsgsTable rows={this.props.msgProcessedRows}
+                                tableWidth={this.state.tableWidth}
+                                tableHeight={this.state.msgProcessedTableHeight}
+                                filterState={this.props.filterState.msgProcessedFilterState}
+                                scrollTop={this.state.msgProcessedTableScrollTop}
+                                onScrollChanged={scrollChanged}
+                                onRowDoubleClicked={onRowDoubleClicked}
+            />
+        `));
     };
 
     private getLogEventsTable = () => {
-        return LogEventsTable.Component({
-            rows: this.props.logEventRows,
-            tableWidth: this.state.tableWidth,
-            tableHeight: this.state.logEventsTableHeight,
-            filterState: this.props.filterState.logEventFilterState
-        });
+        return React.jsx(`
+            <LogEventsTable
+                rows={this.props.logEventRows}
+                tableWidth={this.state.tableWidth}
+                tableHeight={this.state.logEventsTableHeight}
+                filterState={this.props.filterState.logEventFilterState}/>
+        `);
     };
 
     render() {
-        return (
-            R.div({ id: 'main' },
-                this.getUpperComponent(),
-                this.getLogEventsTable())
-        );
+        return React.jsx(`
+            <div id="main">
+                {this.getUpperComponent()}
+                {this.getLogEventsTable()}
+            </div>
+        `);
+
     }
 }
-export var Component = React.createFactory(MainContent);
+export = MainContent;

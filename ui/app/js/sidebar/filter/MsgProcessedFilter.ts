@@ -3,59 +3,67 @@
 import React = require('react');
 import IdName = require('../../util/IdName');
 import DateTimeInput = require('./DateTimeInput');
+import ProcessingState = require('./ProcessingState');
 var BS = require('react-bootstrap');
-var Button = React.createFactory(BS.Button);
-var Input = React.createFactory(BS.Input);
-var Glyphicon = React.createFactory(BS.Glyphicon);
+var Button = BS.Button;
+var Input = BS.Input;
+var Glyphicon = BS.Glyphicon;
 var R = React.DOM;
 
-export interface FilterState {
-    currentPair: Pair;
-    addedPairs: Pair[];
-    startTime: number;
-    endTime: number;
-    searchText: string;
-    processingState: ProcessingState;
+module MsgProcessedFilter {
+    export interface Props {
+        filterState: FilterState;
+        unreadErrors: number;
+        uniqueSenderIdNames: IdName[];
+        uniqueRecipientIdNames: IdName[];
+        onFilterStateChanged: (filterState:FilterState) => void;
+    }
+    export interface FilterState {
+        currentPair: Pair;
+        addedPairs: Pair[];
+        startTime: number;
+        endTime: number;
+        searchText: string;
+        processingState: ProcessingState;
+    }
+
+
+    export interface Pair {
+        senderId: string;
+        recipientId: string;
+    }
+
 }
 
-export enum ProcessingState {
-    SUCCESS,
-    FAIL
-}
-
-export interface Pair {
-    senderId: string;
-    recipientId: string;
-}
-
-export interface Props {
-    filterState: FilterState;
-    unreadErrors: number;
-    uniqueSenderIdNames: IdName[];
-    uniqueRecipientIdNames: IdName[];
-    onFilterStateChanged: (filterState:FilterState) => void;
-}
-
-class MsgProcessedFilter extends React.Component<Props, {}> {
+class MsgProcessedFilter extends React.Component<MsgProcessedFilter.Props, {}> {
 
     private getComponentDropdown = (label: string,
                                     currentValue: string,
                                     items: IdName[],
-                                    currentPairGetter: (selectedValue:string) => Pair) => {
-        var options = items.map(idName => R.option({ title: idName.id, value: idName.id }, idName.name));
-        options.unshift(R.option({ title: 'any', value: '' }, ''));
+                                    currentPairGetter: (selectedValue:string) => MsgProcessedFilter.Pair) => {
+        var options = items.map(idName => React.jsx(`
+            <option title={idName.id} value={idName.id}>
+                {idName.name}
+            </option>
+        `));
+        options.unshift(React.jsx(`
+            <option title="any" value="">
+            </option>
+        `));
 
         var fs = this.props.filterState;
         var onChange = (e) => {
             fs.currentPair = currentPairGetter(e.target.value);
             this.props.onFilterStateChanged(fs);
         };
-        return Input({
-            value: currentValue === undefined ? '' : currentValue,
-            type: 'select',
-            label: label,
-            onChange: onChange
-        }, options);
+        return React.jsx(`
+            <Input value={currentValue === undefined ? '' : currentValue}
+                   type="select"
+                   label={label}
+                   onChange={onChange}>
+                {options}
+            </Input>
+        `);
     };
 
     private getSenderDropDown = () => {
@@ -82,20 +90,23 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
     };
 
     private getProcessingStateDropdown = () => {
-        var options = [R.option({ value: '' }, ''),
-                       R.option({ value: ProcessingState[ProcessingState.SUCCESS]}, 'Successful'),
-                       R.option({ value: ProcessingState[ProcessingState.FAIL]}, `Failed (${this.props.unreadErrors} new)`)];
-        return (
-            Input({
-                type: 'select',
-                label: 'Processing status',
-                onChange: (e) => {
-                    var newState = _.clone(this.props.filterState);
-                    newState.processingState = ProcessingState[<string>e.target.value];
-                    this.props.onFilterStateChanged(newState);
-                }
-            }, options)
-        );
+        var options = [
+            React.jsx(`<option value=""></option>`),
+            React.jsx(`<option value={ProcessingState[ProcessingState.SUCCESS]}>Successful</option>`),
+            React.jsx(`<option value={ProcessingState[ProcessingState.FAIL]}>Failed ({this.props.unreadErrors} new)</option>`)
+        ];
+        var onChange = (e) => {
+            var newState = _.clone(this.props.filterState);
+            newState.processingState = ProcessingState[<string>e.target.value];
+            this.props.onFilterStateChanged(newState);
+        };
+        return React.jsx(`
+            <Input type="select"
+                   label="Processing status"
+                   onChange={onChange}>
+                {options}
+            </Input>
+        `);
     };
 
     private getAddedComponentPairs = () => {
@@ -106,97 +117,106 @@ class MsgProcessedFilter extends React.Component<Props, {}> {
                                                : 'Any';
                 var recipientName = pair.recipientId ? _.find(this.props.uniqueRecipientIdNames, idName => idName.id === pair.recipientId).name
                                                      : 'Any';
-                return R.div({style: {border: '1px solid grey', padding: '5px'}},
-                    Button({
-                        style: {float: 'right', background: 'none', border: 'none', color: 'white'},
-                        bsSize: 'xsmall',
-                        onClick: () => {
-                            var newState = _.clone(fs);
-                            newState.addedPairs = fs.addedPairs.splice(0);
-                            newState.addedPairs.splice(index, 1);
-                            this.props.onFilterStateChanged(newState);
-                        }
-                    }, Glyphicon({glyph: 'remove-circle'})),
-                    R.div({className: 'control-label', style: {wordWrap: 'break-word'}}, `Sender: ${senderName}`),
-                    R.div({className: 'control-label', style: {wordWrap: 'break-word'}}, `Recipient: ${recipientName}`))
-                })
+                var onClick =  () => {
+                    var newState = _.clone(fs);
+                    newState.addedPairs = fs.addedPairs.splice(0);
+                    newState.addedPairs.splice(index, 1);
+                    this.props.onFilterStateChanged(newState);
+                };
+                return React.jsx(`
+                    <div style={{border: '1px solid grey', padding: '5px'}}>
+                        <Button style={{float: 'right', background: 'none', border: 'none', color: 'white'}}
+                                bsStyle="xsmall"
+                                onClick={onClick}>
+                            <Glyphicon glyph="remove-circle"/>
+                        </Button>
+                        <div className="control-label" style={{wordWrap: 'break-word'}}>
+                            Sender: {senderName}
+                        </div>
+                        <div className="control-label" style={{wordWrap: 'break-word'}}>
+                            Recipient: {recipientName}
+                        </div>
+                    </div>
+                `);
+            })
         );
     };
 
     private getStartDateTimeInput = () => {
-        return (
-            DateTimeInput.Component({
-                value: this.props.filterState.startTime,
-                label: 'Start',
-                onChange: (value: number) => {
-                    var newState = _.clone(this.props.filterState);
-                    newState.startTime = value;
-                    this.props.onFilterStateChanged(newState);
-                }
-            })
-        );
+        var onChange = (value: number) => {
+            var newState = _.clone(this.props.filterState);
+            newState.startTime = value;
+            this.props.onFilterStateChanged(newState);
+        };
+        return React.jsx(`
+            <DateTimeInput value={this.props.filterState.startTime}
+                           label="Start"
+                           onChange={onChange}/>
+        `);
     };
 
     private getEndDateTimeInput = () =>{
-        return (
-            DateTimeInput.Component({
-                value: this.props.filterState.endTime,
-                label: 'End',
-                onChange: (value: number) => {
-                    var newState = _.clone(this.props.filterState);
-                    newState.endTime = value;
-                    this.props.onFilterStateChanged(newState);
-                }
-            })
-        );
+        var onChange = (value: number) => {
+            var newState = _.clone(this.props.filterState);
+            newState.endTime = value;
+            this.props.onFilterStateChanged(newState);
+        };
+        return React.jsx(`
+            <DateTimeInput value={this.props.filterState.endTime}
+                           label="End"
+                           onChange={onChange}/>
+        `);
     };
 
     private getAddComponentPairButton = () => {
         var fs = this.props.filterState;
-        return (
-            Button({
-                bsSize: 'small',
-                onClick: () => {
-                    var newState = _.clone(fs);
-                    newState.addedPairs = fs.addedPairs.splice(0);
-                    newState.addedPairs.push({
-                        senderId: fs.currentPair.senderId,
-                        recipientId: fs.currentPair.recipientId
-                    });
-                    newState.currentPair = {
-                            senderId: undefined,
-                            recipientId: undefined
-                    };
-                    this.props.onFilterStateChanged(newState);
-                }
-            }, 'Add')
-        )
+        var onClick = () => {
+            var newState = _.clone(fs);
+            newState.addedPairs = fs.addedPairs.splice(0);
+            newState.addedPairs.push({
+                senderId: fs.currentPair.senderId,
+                recipientId: fs.currentPair.recipientId
+            });
+            newState.currentPair = {
+                    senderId: undefined,
+                    recipientId: undefined
+            };
+            this.props.onFilterStateChanged(newState);
+        };
+        return React.jsx(`
+            <Button bsSize="small"
+                    onClick={onClick}>
+                Add
+            </Button>
+        `);
     };
 
     private getMsgBodySearchInput = () => {
-        return (
-            Input({
-                type: 'textarea', label: 'Message body', onChange: (event) => {
-                    var newState = _.clone(this.props.filterState);
-                    newState.searchText = event.target.value;
-                    this.props.onFilterStateChanged(newState);
-                }
-            })
-        );
+        var onChange = (event) => {
+            var newState = _.clone(this.props.filterState);
+            newState.searchText = event.target.value;
+            this.props.onFilterStateChanged(newState);
+        };
+        return React.jsx(`
+            <Input type="textarea"
+                   label="Message body"
+                   onChange={onChange}/>
+        `);
     };
 
     render() {
-        return (
-            R.div({},
-                this.getProcessingStateDropdown(),
-                this.getStartDateTimeInput(),
-                this.getEndDateTimeInput(),
-                this.getAddedComponentPairs(),
-                this.getSenderDropDown(),
-                this.getRecipientDropdown(),
-                this.getAddComponentPairButton(),
-                this.getMsgBodySearchInput())
-        );
+        return React.jsx(`
+            <div>
+                {this.getProcessingStateDropdown()}
+                {this.getStartDateTimeInput()}
+                {this.getEndDateTimeInput()}
+                {this.getAddedComponentPairs()}
+                {this.getSenderDropDown()}
+                {this.getRecipientDropdown()}
+                {this.getAddComponentPairButton()}
+                {this.getMsgBodySearchInput()}
+            </div>
+        `);
     }
 }
-export var Component = React.createFactory(MsgProcessedFilter);
+export = MsgProcessedFilter;

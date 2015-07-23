@@ -6,20 +6,23 @@ import LogEventFilter = require('./LogEventFilter');
 import IdName = require('../../util/IdName');
 var R = React.DOM;
 
-export interface FilterState {
-    msgProcessedFilterState: MsgProcessedFilter.FilterState;
-    logEventFilterState: LogEventFilter.FilterState;
+module FilterSidebar {
+    export interface FilterState {
+        msgProcessedFilterState: MsgProcessedFilter.FilterState;
+        logEventFilterState: LogEventFilter.FilterState;
+    }
+
+    export interface Props {
+        filterState: FilterState;
+        uniqueSenderIdNames: IdName[];
+        uniqueRecipientIdNames: IdName[];
+        onFilterStateChanged: (filterState:FilterState) => void;
+        unreadErrors: number;
+    }
 }
 
-export interface Props {
-    filterState: FilterState;
-    uniqueSenderIdNames: IdName[];
-    uniqueRecipientIdNames: IdName[];
-    onFilterStateChanged: (filterState:FilterState) => void;
-    unreadErrors: number;
-}
 
-class FilterSidebar extends React.Component<Props, {}> {
+class FilterSidebar extends React.Component<FilterSidebar.Props, {}> {
     private getMsgProcessedFilterProps = (): MsgProcessedFilter.Props => {
         return {
             filterState: this.props.filterState.msgProcessedFilterState,
@@ -47,11 +50,12 @@ class FilterSidebar extends React.Component<Props, {}> {
     };
 
     render() {
-        return (
-            R.div({},
-                MsgProcessedFilter.Component(this.getMsgProcessedFilterProps()),
-                LogEventFilter.Component(this.getLogEventFilterProps()))
-        );
+        return React.jsx(`
+            <div>
+                <MsgProcessedFilter {...this.getMsgProcessedFilterProps()}/>
+                <LogEventFilter {...this.getLogEventFilterProps()}/>
+            </div>
+        `);
     }
 }
-export var Component = React.createFactory(FilterSidebar);
+export = FilterSidebar;

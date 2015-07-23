@@ -21,7 +21,7 @@ var config = {
     module: {
         noParse: [],
         loaders: [
-            {test: /\.ts$/, loader: 'typescript-loader'},
+            {test: /\.ts$/, loader: 'typescript-loader!ts-jsx-loader'},
             {test: /\.css$/, loader: 'style-loader!css-loader'},
             {test: /\.(png|woff|svg|woff2|eot|ttf)$/, loader: 'url-loader'}
         ]

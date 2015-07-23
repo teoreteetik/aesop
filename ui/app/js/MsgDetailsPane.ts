@@ -3,55 +3,83 @@
 import React = require('react');
 import ProcessedMsgsTable = require('./ProcessedMsgsTable');
 var BS = require('react-bootstrap');
-var Button = React.createFactory(BS.Button);
-var ButtonToolbar = React.createFactory(BS.ButtonToolbar);
-var Row = React.createFactory(BS.Row);
-var Col = React.createFactory(BS.Col);
-var Table = React.createFactory(BS.Table);
-var Panel = React.createFactory(BS.Panel);
-var Input = React.createFactory(BS.Input);
+var Button = BS.Button;
+var ButtonToolbar = BS.ButtonToolbar;
+var Row = BS.Row;
+var Col = BS.Col;
+var Table = BS.Table;
+var Panel = BS.Panel;
+var Input = BS.Input;
 var R = React.DOM;
 
-export interface Props {
-    height: number;
-    row: ProcessedMsgsTable.Row;
-    onBackClicked: () => void;
+module MsgDetailsPane {
+    export interface Props {
+        height: number;
+        row: ProcessedMsgsTable.Row;
+        onBackClicked: () => void;
+    }
 }
 
-class MsgDetailsPane extends React.Component<Props, {}> {
+class MsgDetailsPane extends React.Component<MsgDetailsPane.Props, {}> {
 
     private getMsgDetailsColumn = () => {
-        var panelHeader = (
-            R.div({}, Row({}, Col({ xs: 1 }, Button({ bsSize: 'xsmall', onClick: this.props.onBackClicked }, 'Back')),
-                Col({xs: 11},
-                    Table({condensed: true, bordered: true, className: 'msgDetailsHeader'},
-                        R.tr({}, R.td({}, 'Time'), R.td({}, this.props.row.formattedDate)),
-                        R.tr({}, R.td({}, 'Sender'), R.td({}, this.props.row.senderName)),
-                        R.tr({}, R.td({}, 'Recipient'), R.td({}, this.props.row.recipientName))))))
-        );
+        var panelHeader = React.jsx(`
+                <div>
+                    <Row>
+                        <Col xs={1}>
+                            <Button bsSize="xsmall" onClick={this.props.onBackClicked}>
+                                Back
+                            </Button>
+                        </Col>
+                        <Col xs={11}>
+                            <Table condensed={true} bordered={true} className="msgDetailsHeader">
+                                <tr>
+                                    <td>Time</td>
+                                    <td>{this.props.row.formattedDate}</td>
+                                </tr>
+                                <tr>
+                                    <td>Sender</td>
+                                    <td>{this.props.row.senderName}</td>
+                                </tr>
+                                <tr>
+                                    <td>Recipient</td>
+                                    <td>{this.props.row.recipientName}</td>
+                                </tr>
+                            </Table>
+                        </Col>
+                    </Row>
+                </div>
+        `);
         var rowSpan = this.props.row.original.stackTrace ? 6 : 12;
-        return (
-            Col({ xs: rowSpan, style: { height: this.props.height } },
-                Panel({ header: panelHeader, className: 'formatted overviewPanel' },
-                    R.pre({}, this.props.row.formattedMsgBody)))
-        );
+        return React.jsx(`
+                <Col xs={rowSpan} style={{height: this.props.height}}>
+                    <Panel header={panelHeader} className="formatted overviewPanel">
+                        <pre>{this.props.row.formattedMsgBody}</pre>
+                    </Panel>
+                </Col>
+        `);
     };
 
     private getStacktraceColumn = () => {
         if (this.props.row.original.stackTrace)
-            return Col({ xs: 6, style: { height: this.props.height } },
-                    Panel({ header: 'Stacktrace', bsStyle: 'danger', className: 'overviewPanel' },
-                        this.props.row.original.stackTrace));
+            return React.jsx(`
+                <Col xs={6} style={{height: this.props.height}}>
+                    <Panel header="Stacktrace" bsStyle="danger" className="overviewPanel">
+                        {this.props.row.original.stackTrace}
+                    </Panel>
+                </Col>
+            `);
         else
             return null;
     };
 
     render() {
-        return (
-            Row({},
-                this.getMsgDetailsColumn(),
-                this.getStacktraceColumn())
-        );
+        return React.jsx(`
+            <Row>
+                {this.getMsgDetailsColumn()}
+                {this.getStacktraceColumn()}
+            </Row>
+        `);
     }
 }
-export var Component = React.createFactory(MsgDetailsPane);
+export = MsgDetailsPane;

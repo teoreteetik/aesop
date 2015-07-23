@@ -1,0 +1,40 @@
+{
+    "version": "1.5.0-alpha",
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "noLib": false,
+        "preserveConstEnums": true,
+        "suppressImplicitAnyIndexErrors": true
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "!./node_modules/**/*.ts"
+    ],
+    "files": [
+        "./app/js/ConnectForm.ts",
+        "./app/js/LogEventsTable.ts",
+        "./app/js/Main.ts",
+        "./app/js/MainContent.ts",
+        "./app/js/MsgDetailsPane.ts",
+        "./app/js/Page.ts",
+        "./app/js/ProcessedMsgsTable.ts",
+        "./app/js/WebSocketMsgs.ts",
+        "./app/js/sidebar/AnalyzersList.ts",
+        "./app/js/sidebar/Sidebar.ts",
+        "./app/js/sidebar/filter/DateTimeInput.ts",
+        "./app/js/sidebar/filter/FilterSidebar.ts",
+        "./app/js/sidebar/filter/LogEventFilter.ts",
+        "./app/js/sidebar/filter/MsgProcessedFilter.ts",
+        "./app/js/util/FormatUtil.ts",
+        "./app/js/util/IdName.ts",
+        "./app/main.ts",
+        "./app/types/common.d.ts",
+        "./app/types/lodash/lodash.d.ts",
+        "./app/types/moment/moment.d.ts",
+        "./app/types/react/react.d.ts"
+    ]
+}

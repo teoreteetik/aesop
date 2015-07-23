@@ -12,8 +12,10 @@ import MainContent = require('./MainContent');
 import FilterSidebar = require('./sidebar/filter/FilterSidebar');
 var R = React.DOM;
 
-export interface Props {
-    socket: WebSocket;
+module Page {
+    export interface Props {
+        socket: WebSocket;
+    }
 }
 
 interface PageState {
@@ -31,7 +33,7 @@ interface AnalyzerState {
     unreadErrors: number;
 }
 
-class Page extends React.Component<Props, PageState> {
+class Page extends React.Component<Page.Props, PageState> {
     constructor(props) {
         super(props);
         this.state = {
@@ -194,11 +196,12 @@ class Page extends React.Component<Props, PageState> {
     };
 
     render() {
-        return (
-            R.div({ id: 'wrapper' },
-                Sidebar.Component(this.getSidebarProps()),
-                MainContent.Component(this.getMainContentProps()))
-        );
+        return React.jsx(`
+            <div id="wrapper">
+                <Sidebar {...this.getSidebarProps()}/>
+                <MainContent {...this.getMainContentProps()}/>
+            </div>
+        `);
     }
 }
-export var Component = React.createFactory(Page);
+export = Page;

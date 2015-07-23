@@ -1,0 +1,36 @@
+{
+    "version": "1.5.0-alpha",
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "noLib": false,
+        "preserveConstEnums": true,
+        "suppressImplicitAnyIndexErrors": true
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "!./node_modules/**/*.ts"
+    ],
+    "files": [
+        "./ConnectForm.ts",
+        "./LogEventsTable.ts",
+        "./Main.ts",
+        "./MainContent.ts",
+        "./MsgDetailsPane.ts",
+        "./Page.ts",
+        "./ProcessedMsgsTable.ts",
+        "./WebSocketMsgs.ts",
+        "./sidebar/AnalyzersList.ts",
+        "./sidebar/Sidebar.ts",
+        "./sidebar/filter/DateTimeInput.ts",
+        "./sidebar/filter/FilterSidebar.ts",
+        "./sidebar/filter/LogEventFilter.ts",
+        "./sidebar/filter/MsgProcessedFilter.ts",
+        "./sidebar/filter/ProcessingState.ts",
+        "./util/FormatUtil.ts",
+        "./util/IdName.ts"
+    ]
+}

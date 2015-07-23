@@ -5,35 +5,37 @@ import IdName = require('../util/IdName');
 import AnalyzersList = require('./AnalyzersList');
 import FilterSidebar = require('./filter/FilterSidebar');
 var BS = require('react-bootstrap');
-var Button = React.createFactory(BS.Button);
-var Glyphicon = React.createFactory(BS.Glyphicon);
+var Button = BS.Button;
+var Glyphicon = BS.Glyphicon;
 var R = React.DOM;
 
-export interface Props {
-    activeAnalyzerId: string;
-    analyzers: AnalyzerState[];
-    onAnalyzerClicked: (id:string) => void;
-    filterState: FilterSidebar.FilterState;
-    onFilterStateChanged: (filterState: FilterSidebar.FilterState) => void;
+module Sidebar {
+    export interface Props {
+        activeAnalyzerId: string;
+        analyzers: AnalyzerState[];
+        onAnalyzerClicked: (id:string) => void;
+        filterState: FilterSidebar.FilterState;
+        onFilterStateChanged: (filterState: FilterSidebar.FilterState) => void;
+    }
+    export interface AnalyzerState {
+        idName: IdName;
+        componentIdNames: IdName[];
+        uniqueSenderIdNames: IdName[];
+        uniqueRecipientIdNames: IdName[];
+        unreadErrors: number;
+    }
 }
 
-export interface AnalyzerState {
-    idName: IdName;
-    componentIdNames: IdName[];
-    uniqueSenderIdNames: IdName[];
-    uniqueRecipientIdNames: IdName[];
-    unreadErrors: number;
+interface State {
+    currentView: CurrentView;
 }
-
 enum CurrentView {
     ANALYZERS_LIST,
     FILTER
 }
-interface State {
-    currentView: CurrentView;
-}
 
-class Sidebar extends React.Component<Props, State> {
+
+class Sidebar extends React.Component<Sidebar.Props, State> {
     constructor(props) {
         super(props);
         this.state = {
@@ -53,7 +55,9 @@ class Sidebar extends React.Component<Props, State> {
             }),
             onAnalyzerClicked: this.props.onAnalyzerClicked
         };
-        return AnalyzersList.Component(analyzersListProps);
+        return React.jsx(`
+            <AnalyzersList {...analyzersListProps}/>
+        `);
     };
 
     private getFilterComponent = () => {
@@ -65,7 +69,9 @@ class Sidebar extends React.Component<Props, State> {
             onFilterStateChanged: this.props.onFilterStateChanged,
             unreadErrors: analyzerState.unreadErrors
         };
-        return FilterSidebar.Component(filterProps);
+        return React.jsx(`
+            <FilterSidebar {...filterProps}/>
+        `);
     };
 
     private getCurrentContent = () => {
@@ -79,29 +85,40 @@ class Sidebar extends React.Component<Props, State> {
 
     private getVisibleButtons = () => {
         var buttons = [];
-        if (this.state.currentView !== CurrentView.ANALYZERS_LIST)
-            buttons.push(Button({ bsSize: 'xsmall',
-                                  onClick: () => this.setState({ currentView: CurrentView.ANALYZERS_LIST }) },
-                            Glyphicon({ glyph: 'list' }),
-                            'Analyzers'));
-        if (this.state.currentView !== CurrentView.FILTER)
-            buttons.push(Button({ bsSize: 'xsmall',
-                                  onClick: () => this.setState({ currentView: CurrentView.FILTER }) },
-                            Glyphicon({ glyph: 'filter' }),
-                            'Filter'));
+        if (this.state.currentView !== CurrentView.ANALYZERS_LIST) {
+            var clickHandler = () => this.setState({ currentView: CurrentView.ANALYZERS_LIST });
+            buttons.push(React.jsx(`
+                <Button bsSize="xsmall" onClick={clickHandler}>
+                    <Glyphicon glyph="list" />
+                    Analyzers
+                </Button>
+            `));
+        } else if (this.state.currentView !== CurrentView.FILTER) {
+            var clickHandler = () => this.setState({currentView: CurrentView.FILTER});
+            buttons.push(React.jsx(`
+                <Button bsSize="xsmall" onClick={clickHandler}>
+                    <Glyphicon glyph="filter" />
+                    Filter
+                </Button>
+            `));
+        }
         return buttons;
     };
 
     render() {
-        return (
-            R.div({ id: 'sidebar' },
-                R.ul({ className: 'sidebar-nav' },
-                    R.li({ className: 'sidebar-brand' },
-                        R.a({ href: '#' }, '')),
-                    R.li({},
-                        this.getVisibleButtons())),
-                this.getCurrentContent())
-        );
+      return React.jsx(`
+        <div id="sidebar">
+            <ul className="sidebar-nav">
+                <li className="sidebar-brand">
+                    <a href="#">Aesop</a>
+                </li>
+                <li>
+                    {this.getVisibleButtons()}
+                </li>
+            </ul>
+            {this.getCurrentContent()}
+        </div>
+      `);
     }
 }
-export var Component = React.createFactory(Sidebar);
+export = Sidebar

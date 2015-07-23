@@ -3,23 +3,26 @@
 import React = require('react');
 import moment = require('moment');
 var BS = require('react-bootstrap');
-var Input = React.createFactory(BS.Input);
-var Row = React.createFactory(BS.Row);
-var Col = React.createFactory(BS.Col);
+var Input = BS.Input;
+var Row = BS.Row;
+var Col = BS.Col;
 
-export interface Props {
-    label: string;
-    value: number;
-    onChange: (time: number) => void;
+module DateTimeInput {
+    export interface Props {
+        label: string;
+        value: number;
+        onChange: (time: number) => void;
+    }
 }
+
 
 interface State {
     timeString: string;
     dateString: string;
 }
 
-class DateTimeInput extends React.Component<Props, State> {
-    constructor(props: Props) {
+class DateTimeInput extends React.Component<DateTimeInput.Props, State> {
+    constructor(props: DateTimeInput.Props) {
         super(props);
         if (props.value) {
             var date = moment(props.value);
@@ -44,29 +47,26 @@ class DateTimeInput extends React.Component<Props, State> {
             this.props.onChange(undefined);
     };
     render() {
-        return (
-            Row({},
-                Col({ xs: 5, style: { paddingRight: 0 } },
-                    Input({
-                        ref: 'timeInput',
-                        label: `${this.props.label} time`,
-                        type: 'text',
-                        placeholder: 'HH:mm:ss',
-                        onChange: this.onChange,
-                        value: this.state.timeString
-                    })
-                ),
-                Col({ xs: 7 },
-                    Input({
-                        ref: 'dateInput',
-                        label: `${this.props.label} date`,
-                        type: 'text',
-                        placeholder: 'dd.MM.yyyy',
-                        onChange: this.onChange,
-                        value: this.state.dateString
-                    })
-                ))
-        );
+        return React.jsx(`
+            <Row>
+                <Col xs={5} style={{paddingRight: 0}}>
+                    <Input ref="timeInput"
+                           label={this.props.label + 'time'}
+                           type="text"
+                           placeholder="HH:mm:ss"
+                           onChange={this.onChange}
+                           value={this.state.timeString}/>
+                </Col>
+                <Col xs={7}>
+                    <Input ref="dateInput"
+                           label={this.props.label + 'date'}
+                           type="text"
+                           placeholder="dd.MM.yyyy"
+                           onChange={this.onChange}
+                           value={this.state.dateString}/>
+                </Col>
+            </Row>
+        `);
     }
 }
-export var Component = React.createFactory(DateTimeInput);
+export = DateTimeInput;

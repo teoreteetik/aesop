@@ -6,22 +6,23 @@ import LogEventFilter = require('./sidebar/filter/LogEventFilter');
 
 require('fixed-data-table.css');
 var FixedDataTable = require('fixed-data-table');
-var Table = React.createFactory(FixedDataTable.Table);
-var Column = React.createFactory(FixedDataTable.Column);
+var Table = FixedDataTable.Table;
+var Column = FixedDataTable.Column;
 
-export interface Props {
-    rows: Row[];
-    tableWidth: number;
-    tableHeight: number;
-    filterState: LogEventFilter.FilterState;
-}
-
-export interface Row {
-    logLevel: string;
-    formattedDate: string;
-    componentName: string;
-    formattedMsgBody: string;
-    original: WebSocketMsgs.LogEvent;
+module LogEventsTable {
+    export interface Props {
+        rows: Row[];
+        tableWidth: number;
+        tableHeight: number;
+        filterState: LogEventFilter.FilterState;
+    }
+    export interface Row {
+        logLevel: string;
+        formattedDate: string;
+        componentName: string;
+        formattedMsgBody: string;
+        original: WebSocketMsgs.LogEvent;
+    }
 }
 
 var logLevelDK = 'logLevel';
@@ -34,7 +35,7 @@ interface State {
     isColumnResizing: boolean;
 }
 
-class LogEventsTable extends React.Component<Props, State> {
+class LogEventsTable extends React.Component<LogEventsTable.Props, State> {
     constructor(props) {
         super(props);
         this.state = {
@@ -55,9 +56,9 @@ class LogEventsTable extends React.Component<Props, State> {
     };
 
     private getFilteredRows = () => {
-        var passesStartTimeFilter = (row: Row) => !this.props.filterState.startTime || row.original.time >= this.props.filterState.startTime;
-        var passesEndTimeFilter = (row: Row) => !this.props.filterState.endTime || row.original.time <= this.props.filterState.endTime;
-        var passesComponentFilter = (row: Row) => !this.props.filterState.componentId || row.original.componentId === this.props.filterState.componentId;
+        var passesStartTimeFilter = (row: LogEventsTable.Row) => !this.props.filterState.startTime || row.original.time >= this.props.filterState.startTime;
+        var passesEndTimeFilter = (row: LogEventsTable.Row) => !this.props.filterState.endTime || row.original.time <= this.props.filterState.endTime;
+        var passesComponentFilter = (row: LogEventsTable.Row) => !this.props.filterState.componentId || row.original.componentId === this.props.filterState.componentId;
         return (
             this.props.rows.filter(row => passesComponentFilter(row) &&
                                           passesStartTimeFilter(row) &&
@@ -67,45 +68,39 @@ class LogEventsTable extends React.Component<Props, State> {
 
     render() {
         var rows = this.getFilteredRows();
-        var rowGetter = (index: number): Row => rows[index];
-
-        return (
-            Table({
-                rowHeight: 30,
-                rowGetter: rowGetter,
-                rowsCount: this.props.rows.length,
-                width: this.props.tableWidth,
-                height: this.props.tableHeight,
-                isColumnResizing: this.state.isColumnResizing,
-                onColumnResizeEndCallback: this.onColumnResizeEndCallback,
-                headerHeight: 40,
-                onRowClick: (event, index, data) => {}
-            },
-            Column({
-                label: 'Level',
-                width: this.state.columnWidths[logLevelDK],
-                isResizable: true,
-                dataKey: logLevelDK
-            }),
-            Column({
-                label: 'Time',
-                width: this.state.columnWidths[formattedDateDK],
-                isResizable: true,
-                dataKey: formattedDateDK
-            }),
-            Column({
-                label: 'Component',
-                width: this.state.columnWidths[componentNameDK],
-                isResizable: true,
-                dataKey: componentNameDK
-            }),
-            Column({
-                label: 'Message',
-                width: this.state.columnWidths[formattedMsgBodyDK],
-                isResizable: true,
-                dataKey: formattedMsgBodyDK
-            }))
-        );
+        var rowGetter = (index: number): LogEventsTable.Row => rows[index];
+        return React.jsx(`
+                <Table
+                    rowHeight={30}
+                    rowGetter={rowGetter}
+                    rowsCount={this.props.rows.length}
+                    width={this.props.tableWidth}
+                    height={this.props.tableHeight}
+                    isColumnResizing={this.state.isColumnResizing}
+                    onColumnResizeEndCallback={this.onColumnResizeEndCallback}
+                    headerHeight={40}>
+                    <Column
+                        label="Level"
+                        width={this.state.columnWidths[logLevelDK]}
+                        isResizable={true}
+                        dataKey={logLevelDK}/>
+                    <Column
+                        label="Time"
+                        width={this.state.columnWidths[formattedDateDK]}
+                        isResizable={true}
+                        dataKey={formattedDateDK}/>
+                    <Column
+                        label="Component"
+                        width={this.state.columnWidths[componentNameDK]}
+                        isResizable={true}
+                        dataKey={componentNameDK}/>
+                    <Column
+                        label="Message"
+                        width={this.state.columnWidths[formattedMsgBodyDK]}
+                        isResizable={true}
+                        dataKey={formattedMsgBodyDK}/>
+                </Table>
+        `);
     }
 }
-export var Component = React.createFactory(LogEventsTable);
+export = LogEventsTable;
